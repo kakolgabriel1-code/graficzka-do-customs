@@ -32,8 +32,8 @@ function renderSummary(){var rows=[];if(state.vehicle)rows.push({n:state.vehicle
 function renderRegions(){
  q('#cn-region').innerHTML=C.cnRegions.map(function(r){return '<option value="'+r[0]+'">'+r[1]+' — '+r[2]+' ('+r[0]+')</option>'}).join('');
  q('#jp-region').innerHTML=C.jpRegions.map(function(r){return '<option value="'+r[0]+'">'+r[1]+' — '+r[2]+'</option>'}).join('');
- q('#jp-kana').innerHTML=C.jpKana.map(function(k){return '<option value="'+k[0]+'">'+k[1]+' — '+k[0]+'</option>'}).join('');
- q('#jp-region').value='SHINAGAWA';q('#jp-kana').value='SA';q('#jp-class').value='330';q('#jp-serial').value='8515';
+ q('#jp-kana-list').innerHTML=C.jpKana.map(function(k){return '<option value="'+k[0]+'" label="'+k[1]+'"></option>'}).join('');
+ q('#jp-region').value='SHINAGAWA';q('#jp-kana').value='SA';q('#jp-class').value='330';q('#jp-serial').value='85-15';
  updateCnPreview();updateJpPreview();
 }
 function updateCnPreview(){var r=C.makeChinaReg(q('#cn-region').value,q('#cn-letter').value,q('#cn-suffix').value);q('#cn-preview').textContent=r.display+'   •   '+r.canonical}
