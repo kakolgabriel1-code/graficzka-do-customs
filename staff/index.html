@@ -41,7 +41,7 @@
 
     <main>
       <div class="page-head">
-        <div><div class="eyebrow">HOOD STORIES CUSTOMS • STAFF</div><h2>Centrum warsztatu</h2><p>Klient tworzy projekt. Oficjalne zlecenie powstaje dopiero tutaj, po przyjęciu auta.</p></div>
+        <div><div class="eyebrow">HOOD STORIES CUSTOMS • STAFF</div><h2>Centrum warsztatu</h2><p>Klient tworzy zlecenie na stronie. Ty importujesz kod, sprawdzasz auto i prowadzisz zlecenie krok po kroku.</p></div>
         <span class="setup-badge">1 = przyjęcie • 2–8 = uniwersalne • lakiernia osobno</span>
       </div>
 
@@ -49,14 +49,14 @@
         <button data-tab="projects" class="active">Projekty klientów</button>
         <button data-tab="orders">Zlecenia</button>
         <button data-tab="bays">Stanowiska</button>
-        <button data-tab="parts">Zamawianie części</button>
+        <button data-tab="parts">CZĘŚCI / DOSTAWY</button>
       </div>
 
       <section id="tab-projects" class="panel-view">
         <div class="card" style="padding:18px;margin-bottom:16px">
           <div class="section-title"><div><span class="section-icon">⇲</span><h3>Import projektu</h3></div><small>gdy klient ma projekt z innego urządzenia</small></div>
           <div class="import-box">
-            <textarea id="project-code" class="input" placeholder="HSCP1:..."></textarea>
+            <textarea id="project-code" class="input" placeholder="Wklej cały kod klienta: HSCP2:..."></textarea>
             <button id="import-project" class="btn primary">Importuj</button>
           </div>
         </div>
@@ -94,7 +94,7 @@
             <label class="field-label" style="margin-top:12px">ILOŚĆ</label>
             <input id="parts-qty" class="input" type="number" min="1" max="64" value="1">
             <button id="parts-create" class="btn primary wide" style="margin-top:14px">ZAPISZ ZAMÓWIENIE</button>
-            <div class="note">WebDisplays nie może sam wykonać komendy Minecrafta. Po zapisaniu strona poda dokładną komendę datapacka. To jest obecny most między stroną a serwerem bez własnego moda-bridge.</div>
+            <div class="note">Po zapisaniu zamówienia dostaniesz dokładną komendę do uruchomienia dostawy w Minecraft. W zakładce Zlecenia klient zobaczy też wiadomość o zamówionej części.</div>
           </div>
           <div class="card" style="padding:18px">
             <div class="section-title"><div><span class="section-icon">↧</span><h3>Aktywne dostawy</h3></div><small id="parts-count">0</small></div>
@@ -114,8 +114,10 @@
   <script src="../data-parts-3.js"></script>
   <script src="../data-parts-4.js"></script>
   <script src="../data-parts-5.js"></script>
-  <script src="../shared/hsc-common.js"></script>
-  <script src="../shared/i18n-pl.js"></script>
-  <script src="staff.js?v=5"></script>
+  <script src="../shared/hsc-common.js?v=6"></script>
+  <script src="../shared/i18n-pl.js?v=6"></script>
+  <script src="../shared/backend-config.js?v=1"></script>
+  <script src="../shared/backend.js?v=1"></script>
+  <script src="staff.js?v=6"></script>
 </body>
 </html>
