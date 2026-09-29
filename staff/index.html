@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#100917">
+  <title>HSC Staff OS</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body.staff-only{background:radial-gradient(900px 500px at 20% -10%,#2a1041 0%,transparent 65%),linear-gradient(180deg,#0d0813,#070509)}
+    #auth-screen{min-height:100vh;display:grid;place-items:center;padding:24px}.auth-card{width:min(520px,100%);padding:28px}.auth-logo{width:250px;max-width:90%;display:block;margin:0 auto 22px;filter:drop-shadow(0 0 28px #9b4cff55)}.auth-card h1{margin:0 0 8px;font-size:34px}.auth-card p{line-height:1.55}.auth-note{font-size:10px;color:#7d6f86;line-height:1.5;margin-top:14px}
+    .staff-app.hidden{display:none}.staff-only .topbar .staff-label{margin-left:auto;color:#dba9ff;border:1px solid #4a2d61;border-radius:999px;padding:9px 12px;font-size:10px;letter-spacing:.14em}.top-actions{display:flex;gap:8px}
+    .project-row{display:grid;grid-template-columns:1.2fr 1.45fr 1fr .8fr auto;gap:12px;align-items:center;padding:12px;border:1px solid #2d1f38;background:#100b15;border-radius:13px;cursor:pointer}.project-row:hover{border-color:#75459a}.project-row b{font-size:11px}.project-row small{display:block;color:#7f7188;margin-top:4px;font-size:9px}
+    .staff-tabs{display:flex;gap:8px;margin-bottom:18px}.staff-tabs button{border:1px solid #352344;background:#130d1a;color:#bdaec7;border-radius:999px;padding:9px 12px;cursor:pointer}.staff-tabs button.active{border-color:#b36cff;color:#fff;background:#29153a}
+    .panel-view.hidden{display:none}.import-box{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}.import-box textarea{min-height:86px}.setup-badge{display:inline-flex;padding:6px 9px;border-radius:999px;border:1px solid #52356a;color:#d5abf3;background:#241531;font-size:10px}
+    @media(max-width:850px){.project-row{grid-template-columns:1fr 1fr}.import-box{grid-template-columns:1fr}}
+  </style>
+</head>
+<body class="staff-only">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
+
+  <section id="auth-screen">
+    <div class="auth-card card">
+      <img class="auth-logo" src="../6b126b05-b0e0-42fc-a25c-68007bc75f3a.png" alt="HSC">
+      <div class="eyebrow">HSC STAFF OS</div>
+      <h1 id="auth-title">Weryfikacja pracownika</h1>
+      <p id="auth-copy" class="muted">Wpisz PIN pracownika, aby otworzyć panel warsztatu.</p>
+      <label class="field-label" id="pin-label">PIN</label>
+      <input id="staff-pin" class="input" type="password" inputmode="numeric" autocomplete="off" placeholder="••••••">
+      <button id="auth-submit" class="btn primary wide" style="margin-top:12px">Zaloguj</button>
+      <div class="auth-note" id="auth-note"></div>
+    </div>
+  </section>
+
+  <div id="staff-app" class="staff-app hidden">
+    <header class="topbar">
+      <div class="brand"><img src="../6b126b05-b0e0-42fc-a25c-68007bc75f3a.png" alt="HSC"></div>
+      <div class="staff-label">STAFF • VERIFIED</div>
+      <button id="logout" class="btn ghost" style="padding:9px 12px">Wyloguj</button>
+    </header>
+
+    <main>
+      <div class="page-head">
+        <div><div class="eyebrow">HOOD STORIES CUSTOMS • STAFF</div><h2>Centrum warsztatu</h2><p>Klient tworzy projekt. Oficjalne zlecenie powstaje dopiero tutaj, po przyjęciu auta.</p></div>
+        <span class="setup-badge">1 = przyjęcie • 2–8 = uniwersalne • lakiernia osobno</span>
+      </div>
+
+      <div class="staff-tabs">
+        <button data-tab="projects" class="active">Projekty klientów</button>
+        <button data-tab="orders">Zlecenia</button>
+        <button data-tab="bays">Stanowiska</button>
+      </div>
+
+      <section id="tab-projects" class="panel-view">
+        <div class="card" style="padding:18px;margin-bottom:16px">
+          <div class="section-title"><div><span class="section-icon">⇲</span><h3>Import projektu</h3></div><small>gdy klient ma projekt z innego urządzenia</small></div>
+          <div class="import-box">
+            <textarea id="project-code" class="input" placeholder="HSCP1:..."></textarea>
+            <button id="import-project" class="btn primary">Importuj</button>
+          </div>
+        </div>
+        <div class="card" style="padding:18px">
+          <div class="section-title"><div><span class="section-icon">▦</span><h3>Projekty oczekujące</h3></div><small id="project-count">0</small></div>
+          <div id="project-list" class="order-list"></div>
+        </div>
+      </section>
+
+      <section id="tab-orders" class="panel-view hidden">
+        <div class="card" style="padding:18px">
+          <div class="section-title"><div><span class="section-icon">✓</span><h3>Oficjalne zlecenia</h3></div>
+            <select id="order-filter" class="input compact">
+              <option value="all">Wszystkie</option><option>PRZYJĘCIE</option><option>WYCENA</option><option>ZAAKCEPTOWANE</option><option>OCZEKUJE NA CZĘŚCI</option><option>W NAPRAWIE</option><option>LAKIERNIA</option><option>TEST</option><option>GOTOWE DO ODBIORU</option><option>WYDANE</option>
+            </select>
+          </div>
+          <div id="order-list" class="order-list"></div>
+        </div>
+      </section>
+
+      <section id="tab-bays" class="panel-view hidden">
+        <div id="bay-grid" class="bay-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal" class="modal hidden"><div class="modal-backdrop" data-close-modal></div><div class="modal-card card"><button class="modal-x" data-close-modal>×</button><div id="modal-content"></div></div></div>
+
+  <script src="../shared/hsc-common.js"></script>
+  <script src="staff.js"></script>
+</body>
+</html>
