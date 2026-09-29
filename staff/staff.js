@@ -5,7 +5,7 @@ var DATA=window.HSC_DATA||{vehicles:[],parts:[]};
 DATA.parts=DATA.parts||[];
 var SESSION='hsc_staff_session_v1';
 var PARTS_KEY='hsc_parts_orders_v1';
-var partCats=[{id:1,name:'Silnik / performance'},{id:2,name:'Zawieszenie'},{id:3,name:'Hamulce'},{id:4,name:'Koła / opony'},{id:5,name:'Nadwozie / bodykit'},{id:6,name:'Wnętrze'},{id:7,name:'Wskaźniki / elektryka'},{id:8,name:'Pozostałe części'}];
+var partCats=[{id:1,name:'Silnik / osiągi'},{id:2,name:'Zawieszenie'},{id:3,name:'Hamulce'},{id:4,name:'Koła / opony'},{id:5,name:'Nadwozie / pakiet karoserii'},{id:6,name:'Wnętrze'},{id:7,name:'Wskaźniki / elektryka'},{id:8,name:'Pozostałe części'}];
 var statuses=['PRZYJĘCIE','WYCENA','ZAAKCEPTOWANE','OCZEKUJE NA CZĘŚCI','W NAPRAWIE','LAKIERNIA','TEST','GOTOWE DO ODBIORU','WYDANE'];
 function q(s,r){return (r||document).querySelector(s)}function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function toast(m){var t=q('#toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
