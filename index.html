@@ -1,159 +1,18 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <meta name="theme-color" content="#100917" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=./client/">
   <title>Hood Stories Customs</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>html,body{margin:0;min-height:100%;background:#09070d;color:#f8f2ff;font-family:Segoe UI,Arial,sans-serif}body{display:grid;place-items:center}.box{text-align:center;padding:30px}.box a{color:#cf8cff}</style>
 </head>
 <body>
-  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
-  <header class="topbar">
-    <button class="brand" data-go="home" aria-label="Strona główna">
-      <img src="6b126b05-b0e0-42fc-a25c-68007bc75f3a.png" alt="Hood Stories Customs" />
-    </button>
-    <nav class="nav">
-      <button data-go="client">Konfigurator klienta</button>
-      <button data-go="staff">Panel pracownika</button>
-      <button data-go="status">Status zlecenia</button>
-    </nav>
-    <div class="live-pill"><span></span> HSC SYSTEM ONLINE</div>
-  </header>
-
-  <main id="app">
-    <section id="view-home" class="view active home-view">
-      <div class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow">HOOD STORIES CHICAGO • CUSTOM SHOP</div>
-          <h1>Twoje auto.<br><em>Twój projekt.</em></h1>
-          <p>Konfiguruj tylko to, co faktycznie występuje w naszych paczkach samochodowych. Silnik pozostaje fabryczny — modyfikujemy osprzęt, wygląd i setup zgodnie z możliwościami konkretnego auta.</p>
-          <div class="hero-actions">
-            <button class="btn primary" data-go="client">Zacznij konfigurację</button>
-            <button class="btn ghost" data-go="staff">Otwórz panel warsztatu</button>
-          </div>
-          <div class="hero-badges">
-            <span>56 pojazdów</span><span>GT Craft / New Cars / BRCC</span><span>7 stanowisk serwisowych</span>
-          </div>
-        </div>
-        <div class="hero-art card glow-card">
-          <img class="hero-car" src="b189f76c-f467-46fc-b084-aacd37fc85b2.png" alt="HSC car emblem" />
-          <div class="hero-art-caption"><strong>HSC CUSTOM BUILD</strong><small>Konfiguracja • serwis • tuning • historia</small></div>
-        </div>
-      </div>
-      <div class="workflow-strip">
-        <div><b>01</b><span>Przyjęcie auta</span></div><i>→</i>
-        <div><b>02</b><span>Stanowisko 2–8</span></div><i>→</i>
-        <div><b>03</b><span>Cała praca w jednym boksie</span></div><i>→</i>
-        <div><b>04</b><span>Lakiernia tylko gdy potrzebna</span></div><i>→</i>
-        <div><b>05</b><span>Odbiór</span></div>
-      </div>
-    </section>
-
-    <section id="view-client" class="view">
-      <div class="page-head">
-        <div><div class="eyebrow">PANEL KLIENTA</div><h2>Konfigurator HSC</h2><p>Wybierz samochód, jego prawdziwe warianty i kompatybilne części z moda.</p></div>
-        <button class="btn ghost" id="clear-build">Wyczyść projekt</button>
-      </div>
-      <div class="client-grid">
-        <aside class="card selector-panel">
-          <label class="field-label">Znajdź samochód</label>
-          <input id="vehicle-search" class="input" placeholder="np. Silvia S15, Audi Q8..." />
-          <div class="filter-row" id="pack-filters"></div>
-          <div id="vehicle-list" class="vehicle-list"></div>
-        </aside>
-
-        <section class="config-panel">
-          <div id="vehicle-empty" class="card empty-state">
-            <img src="b189f76c-f467-46fc-b084-aacd37fc85b2.png" alt="" />
-            <h3>Wybierz samochód</h3><p>Po wyborze pokażemy wyłącznie modyfikacje dostępne dla tego konkretnego modelu.</p>
-          </div>
-          <div id="vehicle-config" class="hidden">
-            <div class="card vehicle-header">
-              <div class="vehicle-meta">
-                <div class="pack-tag" id="selected-pack"></div>
-                <h3 id="selected-name"></h3>
-                <div class="muted" id="selected-id"></div>
-              </div>
-              <div class="engine-lock"><span>🔒</span><div><b>Silnik fabryczny</b><small>Swap silnika niedostępny. Dozwolone są tylko dodatki, które przewiduje dany mod.</small></div></div>
-            </div>
-
-            <div class="card section-card" id="paint-section">
-              <div class="section-title"><div><span class="section-icon">◈</span><h3>Lakier</h3></div><small>Warianty faktycznie dostępne dla auta</small></div>
-              <div id="paint-options" class="chips"></div>
-              <div class="note">Bodykit i elementy nadwozia traktujemy jako lakierowane pod kolor auta, jeżeli sam mod nie daje osobnego wariantu.</div>
-            </div>
-
-            <div class="card section-card" id="mods-section">
-              <div class="section-title"><div><span class="section-icon">⌁</span><h3>Modyfikacje</h3></div><small>Lista wyciągnięta z paczek samochodowych</small></div>
-              <div id="mod-tabs" class="tabs"></div>
-              <div class="mod-tools"><input id="mod-search" class="input" placeholder="Szukaj części / dodatku..."/><span id="mod-count"></span></div>
-              <div id="mod-grid" class="mod-grid"></div>
-            </div>
-
-            <div class="card section-card">
-              <div class="section-title"><div><span class="section-icon">✦</span><h3>Usługi warsztatowe</h3></div><small>Do dodania niezależnie od części</small></div>
-              <div id="service-grid" class="service-grid"></div>
-            </div>
-          </div>
-        </section>
-
-        <aside class="card build-panel">
-          <div class="build-title"><span>TWÓJ PROJEKT</span><b id="build-count">0</b></div>
-          <div id="build-summary" class="build-summary"><div class="mini-empty">Jeszcze nic nie wybrano.</div></div>
-          <div class="client-form">
-            <input id="client-name" class="input" placeholder="Nick klienta" />
-            <input id="client-reg" class="input" placeholder="Rejestracja auta" maxlength="16" />
-            <textarea id="client-note" class="input" rows="3" placeholder="Dodatkowa prośba / opis projektu..."></textarea>
-          </div>
-          <button id="submit-build" class="btn primary wide">Wyślij zapytanie do warsztatu</button>
-          <small class="legal-note">Wysłanie konfiguracji nie montuje części i nie zatwierdza ceny. Finalną wycenę potwierdza pracownik po przyjęciu auta.</small>
-        </aside>
-      </div>
-    </section>
-
-    <section id="view-staff" class="view">
-      <div class="page-head">
-        <div><div class="eyebrow">HSC STAFF OS</div><h2>Centrum warsztatu</h2><p>Stanowisko 1 = przyjęcie. Stanowiska 2–8 = uniwersalne. Lakiernia osobno.</p></div>
-        <button class="btn ghost" id="seed-demo">Wstaw przykładowe zlecenie</button>
-      </div>
-      <div id="bay-grid" class="bay-grid"></div>
-      <div class="staff-columns">
-        <section class="card orders-card">
-          <div class="section-title"><div><span class="section-icon">▦</span><h3>Zlecenia</h3></div><div class="order-tools"><select id="order-filter" class="input compact"><option value="all">Wszystkie</option><option>NOWE</option><option>PRZYJĘCIE</option><option>WYCENA</option><option>ZAAKCEPTOWANE</option><option>OCZEKUJE NA CZĘŚCI</option><option>W NAPRAWIE</option><option>LAKIERNIA</option><option>TEST</option><option>GOTOWE DO ODBIORU</option><option>WYDANE</option></select></div></div>
-          <div id="order-list" class="order-list"></div>
-        </section>
-        <aside class="card import-card">
-          <div class="section-title"><div><span class="section-icon">⇲</span><h3>Import zlecenia</h3></div></div>
-          <p class="muted">Do czasu podpięcia bazy online klient może przekazać kod zlecenia. Wklej go tutaj, aby przenieść konfigurację na inne urządzenie.</p>
-          <textarea id="import-code" class="input" rows="6" placeholder="HSC1:..."></textarea>
-          <button id="import-order" class="btn primary wide">Importuj</button>
-          <div class="divider"></div>
-          <h4>Magazyn / system</h4>
-          <div class="sys-stats"><div><b id="stat-active">0</b><span>aktywne</span></div><div><b id="stat-waiting">0</b><span>części</span></div><div><b id="stat-ready">0</b><span>gotowe</span></div></div>
-          <div class="backend-note"><b>Tryb lokalny</b><span>Dane są zapisane w tej przeglądarce. Front jest przygotowany pod późniejsze podpięcie wspólnej bazy.</span></div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="view-status" class="view">
-      <div class="status-wrap card">
-        <div class="eyebrow">STATUS ZLECENIA</div><h2>Sprawdź swój projekt</h2><p>Wpisz numer zlecenia zapisany w tej przeglądarce.</p>
-        <div class="status-search"><input id="status-id" class="input" placeholder="np. HSC-260929-4F2A"/><button id="status-check" class="btn primary">Sprawdź</button></div>
-        <div id="status-result"></div>
-      </div>
-    </section>
-  </main>
-
-  <div id="toast" class="toast"></div>
-  <div id="modal" class="modal hidden"><div class="modal-backdrop" data-close-modal></div><div class="modal-card card"><button class="modal-x" data-close-modal>×</button><div id="modal-content"></div></div></div>
-
-  <script src="data-base.js"></script>
-  <script src="data-parts-1.js"></script>
-  <script src="data-parts-2.js"></script>
-  <script src="data-parts-3.js"></script>
-  <script src="data-parts-4.js"></script>
-  <script src="data-parts-5.js"></script>
-  <script src="app.js"></script>
+  <div class="box">
+    <h1>Hood Stories Customs</h1>
+    <p>Przenoszenie do strony klienta…</p>
+    <p><a href="./client/">Otwórz konfigurator klienta</a></p>
+  </div>
+  <script>location.replace('./client/');</script>
 </body>
 </html>
