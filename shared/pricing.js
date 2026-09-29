@@ -39,16 +39,19 @@ function calculate(parts,services){
     var cat=typeof p==='string'?String(p).split('|')[0]:p.category;
     var name=typeof p==='string'?String(p).split('|').slice(1).join('|'):p.name;
     var price=partPrice(cat);
-    rows.push({type:'part',category:cat,name:name,price:price});
+    var payout=Math.round(price*0.65);
+    rows.push({type:'part',category:cat,name:name,price:price,mechanicPayout:payout,workshopShare:price-payout});
     total+=price
   });
   (services||[]).forEach(function(s){
     var id=typeof s==='string'?s:(s.id||'');
     var rec=servicePrices[id]||{name:(s.name||id||'Usługa'),price:1500};
-    rows.push({type:'service',id:id,name:rec.name,price:rec.price});
+    var payout=Math.round(rec.price*0.65);
+    rows.push({type:'service',id:id,name:rec.name,price:rec.price,mechanicPayout:payout,workshopShare:rec.price-payout});
     total+=rec.price
   });
-  return {rows:rows,total:total,mechanicCut:Math.round(total*0.65),workshopCut:total-Math.round(total*0.65)}
+  var mechanicCut=rows.reduce(function(sum,row){return sum+(row.mechanicPayout||0)},0);
+  return {rows:rows,total:total,mechanicCut:mechanicCut,workshopCut:total-mechanicCut}
 }
 function publicTable(){
   return [
