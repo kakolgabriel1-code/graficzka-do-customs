@@ -25,11 +25,10 @@ qa('[data-client-view]').forEach(function(b){b.onclick=function(){setView(b.getA
 function renderPriceList(){
  if(!P||!q('#price-list'))return;
  q('#price-list').innerHTML=P.publicTable().map(function(x){
-  return '<div class="detail-box"><span>'+C.esc(x[0])+'</span><b>'+P.money(x[1])+'</b></div>'
+  var val=typeof x[1]==='number'?P.money(x[1]):String(x[1]);
+  return '<div class="detail-box"><span>'+C.esc(x[0])+'</span><b>'+C.esc(val)+'</b></div>'
  }).join('')
 }
-
-
 function renderFilters(){var packs=['all','GT Craft','New Cars','BRCC'];q('#pack-filters').innerHTML=packs.map(function(p){return '<button class="filter-chip '+(state.pack===p?'active':'')+'" data-pack="'+p+'">'+(p==='all'?'Wszystkie':p)+'</button>'}).join('');qa('[data-pack]').forEach(function(b){b.onclick=function(){state.pack=b.getAttribute('data-pack');renderFilters();renderVehicles()}})}
 function renderVehicles(){var term=q('#vehicle-search').value.trim().toLowerCase();var list=vehicles.filter(function(v){return (state.pack==='all'||v.pack===state.pack)&&(!term||(v.name+' '+v.id+' '+v.category).toLowerCase().indexOf(term)>=0)});q('#vehicle-list').innerHTML=list.map(function(v){return '<button class="vehicle-item '+(state.vehicle&&state.vehicle.id===v.id?'active':'')+'" data-v="'+v.id+'"><b>'+C.esc(v.name)+'</b><small>'+v.id+' • '+C.esc(v.pack)+'</small></button>'}).join('')||'<div class="mini-empty">Brak wyników.</div>';qa('[data-v]').forEach(function(b){b.onclick=function(){selectVehicle(b.getAttribute('data-v'))}})}
 function selectVehicle(id){state.vehicle=vehicles.find(function(v){return v.id===id});state.paint=null;state.parts=[];state.services=[];state.cat='all';renderVehicles();renderConfig();renderSummary()}
@@ -44,7 +43,37 @@ function renderConfig(){var v=state.vehicle;if(!v){q('#vehicle-empty').classList
  renderTabs();renderParts();renderServices()}
 function vehicleParts(){if(!state.vehicle)return[];return DATA.parts.filter(function(p){return (p.cars||[]).indexOf(state.vehicle.id)>=0})}
 function renderTabs(){var cats=['all'].concat(Array.from(new Set(vehicleParts().map(function(p){return p.category}))).sort());q('#mod-tabs').innerHTML=cats.map(function(c){return '<button data-cat="'+C.esc(c)+'" class="'+(state.cat===c?'active':'')+'">'+(c==='all'?'Wszystko':C.esc(T.category(c)))+'</button>'}).join('');qa('[data-cat]').forEach(function(b){b.onclick=function(){state.cat=b.getAttribute('data-cat');renderTabs();renderParts()}})}
-function renderParts(){if(!state.vehicle)return;var all=vehicleParts(),term=q('#mod-search').value.trim().toLowerCase(),list=all.filter(function(p){return(state.cat==='all'||p.category===state.cat)&&(!term||(p.name+' '+T.part(p.name)+' '+p.category+' '+T.category(p.category)).toLowerCase().indexOf(term)>=0)});q('#mod-count').textContent=list.length+' pozycji';if(!all.length){q('#mod-grid').innerHTML='<div class="note" style="grid-column:1/-1">Ten model nie ma rozbudowanej listy wymiennych części w naszej bazie. Nie pokazujemy opcji, których mod nie obsługuje.</div>';return}q('#mod-grid').innerHTML=list.map(function(p){var key=p.category+'|'+p.name,on=state.parts.indexOf(key)>=0;return '<article class="mod-card '+(on?'selected':'')+'" data-part="'+encodeURIComponent(key)+'"><span class="check">'+(on?'✓':'')+'</span><div class="mod-visual">'+(icons[p.category]||'◇')+'</div><b>'+C.esc(T.part(p.name))+'</b><small>'+C.esc(T.category(p.category))+'</small></article>'}).join('');qa('[data-part]').forEach(function(el){el.onclick=function(){var key=decodeURIComponent(el.getAttribute('data-part')),i=state.parts.indexOf(key);if(i>=0)state.parts.splice(i,1);else state.parts.push(key);renderParts();renderSummary()}})}
+function renderParts(){
+ if(!state.vehicle)return;
+ var all=vehicleParts(),term=q('#mod-search').value.trim().toLowerCase();
+ var list=all.filter(function(p){
+  return (state.cat==='all'||p.category===state.cat)&&(!term||(p.name+' '+T.part(p.name)+' '+p.category+' '+T.category(p.category)).toLowerCase().indexOf(term)>=0)
+ });
+ q('#mod-count').textContent=list.length+' pozycji';
+ if(!all.length){
+  q('#mod-grid').innerHTML='<div class="note" style="grid-column:1/-1">Ten model nie ma rozbudowanej listy wymiennych części w naszej bazie. Nie pokazujemy opcji, których mod nie obsługuje.</div>';
+  return
+ }
+ q('#mod-grid').innerHTML=list.map(function(p){
+  var key=p.category+'|'+p.name,on=state.parts.indexOf(key)>=0;
+  var price=P?P.partPrice(p.category,p.name):0;
+  var priceText=P?P.money(price):String(price)+' $';
+  return '<article class="mod-card '+(on?'selected':'')+'" data-part="'+encodeURIComponent(key)+'">'+
+   '<span class="check">'+(on?'✓':'')+'</span>'+
+   '<div class="mod-visual">'+(icons[p.category]||'◇')+'</div>'+
+   '<b>'+C.esc(T.part(p.name))+'</b>'+
+   '<small>'+C.esc(T.category(p.category))+'</small>'+
+   '<strong style="display:block;margin-top:7px;color:#ddb0ff">'+C.esc(priceText)+'</strong>'+
+   '</article>'
+ }).join('');
+ qa('[data-part]').forEach(function(el){
+  el.onclick=function(){
+   var key=decodeURIComponent(el.getAttribute('data-part')),i=state.parts.indexOf(key);
+   if(i>=0)state.parts.splice(i,1);else state.parts.push(key);
+   renderParts();renderSummary()
+  }
+ })
+}
 function renderServices(){
  q('#service-grid').innerHTML=services.map(function(s){
   var forced=s.id==='lakiernia'&&!!state.paint;
@@ -66,8 +95,27 @@ function renderServices(){
   }
  })
 }
-function renderSummary(){var rows=[];if(state.vehicle)rows.push({n:state.vehicle.name,m:state.vehicle.id});if(state.paint)rows.push({n:'Lakier: '+T.color(state.paint),m:'nadwozie'});state.parts.forEach(function(k){var a=k.split('|');rows.push({n:T.part(a.slice(1).join('|')),m:T.category(a[0])})});state.services.forEach(function(id){var s=services.find(function(x){return x.id===id});if(s)rows.push({n:s.name,m:'usługa'})});q('#build-count').textContent=Math.max(0,rows.length-(state.vehicle?1:0));q('#build-summary').innerHTML=rows.length?rows.map(function(r){return '<div class="summary-item"><div><b>'+C.esc(r.n)+'</b><small>'+C.esc(r.m)+'</small></div></div>'}).join(''):'<div class="mini-empty">Jeszcze nic nie wybrano.</div>';if(P&&q('#project-total'))q('#project-total').textContent=P.money(P.calculate(state.parts,state.services).total)}
-
+function renderSummary(){
+ var rows=[];
+ if(state.vehicle)rows.push({n:state.vehicle.name,m:state.vehicle.id});
+ if(state.paint)rows.push({n:'Lakier: '+T.color(state.paint),m:'nadwozie'});
+ state.parts.forEach(function(k){
+  var a=k.split('|'),cat=a.shift(),name=a.join('|'),price=P?P.partPrice(cat,name):0;
+  rows.push({n:T.part(name),m:T.category(cat)+' • '+(P?P.money(price):String(price)+' $')})
+ });
+ state.services.forEach(function(id){
+  var s=services.find(function(x){return x.id===id});
+  if(s){
+   var price=P?P.servicePrice(id):0;
+   rows.push({n:s.name,m:'usługa • '+(P?P.money(price):String(price)+' $')})
+  }
+ });
+ q('#build-count').textContent=Math.max(0,rows.length-(state.vehicle?1:0));
+ q('#build-summary').innerHTML=rows.length?rows.map(function(r){
+  return '<div class="summary-item"><div><b>'+C.esc(r.n)+'</b><small>'+C.esc(r.m)+'</small></div></div>'
+ }).join(''):'<div class="mini-empty">Jeszcze nic nie wybrano.</div>';
+ if(P&&q('#project-total'))q('#project-total').textContent=P.money(P.calculate(state.parts,state.services).total)
+}
 function updateReg(){var raw=q('#client-reg').value.replace(/\D/g,'').slice(0,4);q('#client-reg').value=raw;q('#reg-preview').textContent=raw.length?'CHICAGO '+raw.padStart(4,'0'):'CHICAGO ----'}
 q('#client-reg').addEventListener('input',updateReg);
 
