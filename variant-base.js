@@ -1,0 +1,1 @@
+window.HSC_VARIANTS={cell:64,cols:24,rows:26,count:611,variants:{}};
