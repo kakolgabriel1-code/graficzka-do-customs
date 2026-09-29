@@ -43,8 +43,8 @@ function openProject(id){
    function redraw(){q('#project-parts').innerHTML=(p.parts||[]).map(function(x,i){return '<span>'+C.esc(T.part(x.name))+' <button data-rm-part="'+i+'" style="border:0;background:transparent;color:#e89aff;cursor:pointer">×</button></span>'}).join('')||'<span>Brak wybranych części</span>';qa('[data-rm-part]').forEach(function(b){b.onclick=function(){p.parts.splice(Number(b.getAttribute('data-rm-part')),1);redraw()}})}
    redraw();
    q('#add-part-btn').onclick=function(){var v=q('#add-part').value;if(!v)return;var a=v.split('|');p.parts=p.parts||[];p.parts.push({category:a.shift(),name:a.join('|')});q('#add-part').selectedIndex=0;redraw()};
-   q('#save-project-edit').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();C.saveProject(p);closeModal();renderProjects();toast('Poprawki zapisane.')};
-   q('#create-order').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();createOrderFromProject(p)}
+   q('#save-project-edit').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();if(P){var calc=P.calculate(p.parts||[],p.services||[]);p.priceTotal=calc.total;p.mechanicCut=calc.mechanicCut;p.workshopCut=calc.workshopCut}C.saveProject(p);closeModal();renderProjects();toast('Poprawki i cena zapisane.')};
+   q('#create-order').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();if(P){var calc=P.calculate(p.parts||[],p.services||[]);p.priceTotal=calc.total;p.mechanicCut=calc.mechanicCut;p.workshopCut=calc.workshopCut}createOrderFromProject(p)}
  },0)
 }
 
