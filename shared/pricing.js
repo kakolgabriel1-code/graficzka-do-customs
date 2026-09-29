@@ -48,7 +48,7 @@ function calculate(parts,services){
     rows.push({type:'service',id:id,name:rec.name,price:rec.price});
     total+=rec.price
   });
-  return {rows:rows,total:total,mechanicCut:Math.round(total*0.35),workshopCut:total-Math.round(total*0.35)}
+  return {rows:rows,total:total,mechanicCut:Math.round(total*0.65),workshopCut:total-Math.round(total*0.65)}
 }
 function publicTable(){
   return [
