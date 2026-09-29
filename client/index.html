@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#100917">
+  <title>Hood Stories Customs — Klient</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .client-only main{max-width:1500px}.topbar .client-label{margin-left:auto;font-size:11px;letter-spacing:.14em;color:#cdb8dc;border:1px solid #3b2750;border-radius:999px;padding:9px 12px}
+    .client-intro{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:center;margin-bottom:22px}.client-intro .card{padding:24px}.client-intro img{width:min(100%,360px);display:block;margin:auto;filter:drop-shadow(0 0 34px #8d42ff55)}
+    .reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.reg-cn{display:grid;grid-template-columns:1.3fr .7fr 1.2fr;gap:8px}.plate-preview{margin-top:8px;padding:13px;border:1px solid #3c2a49;background:#0f0b14;border-radius:12px;font-weight:900;letter-spacing:.08em;text-align:center}
+    .summary-actions{display:grid;grid-template-columns:1fr;gap:8px}.project-code{word-break:break-all;min-height:120px}.client-note{font-size:11px;color:#8f8099;line-height:1.5}
+    @media(max-width:900px){.client-intro{grid-template-columns:1fr}.reg-grid,.reg-cn{grid-template-columns:1fr}}
+  </style>
+</head>
+<body class="client-only">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
+  <header class="topbar">
+    <div class="brand"><img src="../6b126b05-b0e0-42fc-a25c-68007bc75f3a.png" alt="Hood Stories Customs"></div>
+    <div class="client-label">STRONA KLIENTA</div>
+  </header>
+
+  <main>
+    <section class="client-intro">
+      <div class="card">
+        <div class="eyebrow">HOOD STORIES CUSTOMS</div>
+        <h1 style="font-size:52px;line-height:.95;margin:0 0 16px;letter-spacing:-.04em">Zbuduj swój projekt.</h1>
+        <p class="muted" style="line-height:1.6">Tutaj tylko przygotowujesz <b>projekt auta</b>. To nie jest oficjalne zlecenie. Prawdziwe zlecenie zakłada pracownik dopiero po przyjęciu auta w warsztacie.</p>
+        <div class="hero-badges"><span>56 pojazdów</span><span>GT Craft / New Cars / BRCC</span><span>silnik zawsze fabryczny</span></div>
+      </div>
+      <div class="card" style="padding:22px;text-align:center">
+        <img src="../b189f76c-f467-46fc-b084-aacd37fc85b2.png" alt="">
+        <small class="muted">Wybierasz tylko rzeczy faktycznie obsługiwane przez dany samochód i mod.</small>
+      </div>
+    </section>
+
+    <div class="client-grid">
+      <aside class="card selector-panel">
+        <label class="field-label">ZNAJDŹ AUTO</label>
+        <input id="vehicle-search" class="input" placeholder="np. Silvia S15, Audi Q8...">
+        <div class="filter-row" id="pack-filters"></div>
+        <div id="vehicle-list" class="vehicle-list"></div>
+      </aside>
+
+      <section class="config-panel">
+        <div id="vehicle-empty" class="card empty-state">
+          <img src="../b189f76c-f467-46fc-b084-aacd37fc85b2.png" alt="">
+          <h3>Wybierz samochód</h3>
+          <p>Po wyborze zobaczysz tylko rzeczy dostępne dla tego modelu.</p>
+        </div>
+
+        <div id="vehicle-config" class="hidden">
+          <div class="card vehicle-header">
+            <div class="vehicle-meta">
+              <div class="pack-tag" id="selected-pack"></div>
+              <h3 id="selected-name"></h3>
+              <div class="muted" id="selected-id"></div>
+            </div>
+            <div class="engine-lock"><span>🔒</span><div><b>Silnik fabryczny</b><small>Silnika nie wymieniamy. Można dobierać tylko dodatki przewidziane przez mod.</small></div></div>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-title"><div><span class="section-icon">◈</span><h3>Lakier</h3></div><small>Warianty auta</small></div>
+            <div id="paint-options" class="chips"></div>
+          </div>
+
+          <div class="card section-card" id="plate-card">
+            <div class="section-title"><div><span class="section-icon">▭</span><h3>Tablica rejestracyjna</h3></div><small>BRCC / New Cars</small></div>
+            <div id="plate-options" class="chips"></div>
+            <div class="note">To wybór stylu tablicy z moda. Numer rejestracyjny wpisujesz niżej przy zapisie projektu.</div>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-title"><div><span class="section-icon">⌁</span><h3>Modyfikacje</h3></div><small>Rzeczy z paczek modów</small></div>
+            <div id="mod-tabs" class="tabs"></div>
+            <div class="mod-tools"><input id="mod-search" class="input" placeholder="Szukaj części..."><span id="mod-count"></span></div>
+            <div id="mod-grid" class="mod-grid"></div>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-title"><div><span class="section-icon">✦</span><h3>Usługi</h3></div><small>Opcjonalne</small></div>
+            <div id="service-grid" class="service-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="card build-panel">
+        <div class="build-title"><span>TWÓJ PROJEKT</span><b id="build-count">0</b></div>
+        <div id="build-summary" class="build-summary"><div class="mini-empty">Jeszcze nic nie wybrano.</div></div>
+
+        <div class="client-form">
+          <label class="field-label">NICK KLIENTA</label>
+          <input id="client-name" class="input" placeholder="Twój nick">
+
+          <label class="field-label">TYP REJESTRACJI</label>
+          <select id="reg-kind" class="input">
+            <option value="LATIN">Zwykła / europejska</option>
+            <option value="CN">Chińska — wybierana bez chińskiej klawiatury</option>
+          </select>
+
+          <div id="reg-latin">
+            <input id="client-reg" class="input" placeholder="np. CHI 0421">
+          </div>
+
+          <div id="reg-cn" class="hidden">
+            <div class="reg-cn">
+              <select id="cn-region" class="input"></select>
+              <input id="cn-letter" class="input" maxlength="1" value="A" placeholder="A">
+              <input id="cn-suffix" class="input" maxlength="5" placeholder="12345">
+            </div>
+            <div id="cn-preview" class="plate-preview">京A·12345</div>
+            <div class="note">Nie musisz wpisywać chińskiego znaku. Wybierasz region z listy, a strona sama tworzy zapis. W bazie przechowujemy też wersję łacińską, np. CN-BJ-A12345.</div>
+          </div>
+
+          <label class="field-label">UWAGI</label>
+          <textarea id="client-note" class="input" rows="4" placeholder="Co chcesz zrobić z autem, dodatkowe informacje..."></textarea>
+        </div>
+
+        <div class="summary-actions">
+          <button id="save-project" class="btn primary wide">ZAPISZ PROJEKT</button>
+          <button id="clear-build" class="btn ghost wide">Wyczyść</button>
+        </div>
+        <p class="client-note">Po zapisaniu dostaniesz kod projektu. Pracownik może go wczytać podczas przyjęcia auta. Sam klient nie tworzy oficjalnego zlecenia.</p>
+      </aside>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal" class="modal hidden"><div class="modal-backdrop" data-close-modal></div><div class="modal-card card"><button class="modal-x" data-close-modal>×</button><div id="modal-content"></div></div></div>
+
+  <script src="../data-base.js"></script>
+  <script src="../data-parts-1.js"></script>
+  <script src="../data-parts-2.js"></script>
+  <script src="../data-parts-3.js"></script>
+  <script src="../data-parts-4.js"></script>
+  <script src="../data-parts-5.js"></script>
+  <script src="../shared/hsc-common.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
