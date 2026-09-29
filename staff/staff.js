@@ -4,6 +4,8 @@ var C=window.HSCCommon,T=window.HSCI18N;
 var DATA=window.HSC_DATA||{vehicles:[],parts:[]};
 DATA.parts=DATA.parts||[];
 var SESSION='hsc_staff_session_v1';
+var PARTS_KEY='hsc_parts_orders_v1';
+var partCats=[{id:1,name:'Silnik / performance'},{id:2,name:'Zawieszenie'},{id:3,name:'Hamulce'},{id:4,name:'Koła / opony'},{id:5,name:'Nadwozie / bodykit'},{id:6,name:'Wnętrze'},{id:7,name:'Wskaźniki / elektryka'},{id:8,name:'Pozostałe części'}];
 var statuses=['PRZYJĘCIE','WYCENA','ZAAKCEPTOWANE','OCZEKUJE NA CZĘŚCI','W NAPRAWIE','LAKIERNIA','TEST','GOTOWE DO ODBIORU','WYDANE'];
 function q(s,r){return (r||document).querySelector(s)}function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function toast(m){var t=q('#toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
@@ -14,10 +16,10 @@ function showAuth(){q('#auth-screen').style.display='grid';q('#staff-app').class
 async function auth(){var pin=q('#staff-pin').value.trim();if(pin.length<4)return toast('PIN musi mieć minimum 4 znaki.');try{if(!C.ownerPinExists()){await C.setupOwnerPin(pin);sessionStorage.setItem(SESSION,'1');toast('PIN zapisany.');showApp()}else if(await C.verifyOwnerPin(pin)){sessionStorage.setItem(SESSION,'1');showApp()}else toast('Nieprawidłowy PIN.')}catch(e){toast('Nie udało się zweryfikować PIN-u.')}}
 q('#auth-submit').onclick=auth;q('#staff-pin').addEventListener('keydown',function(e){if(e.key==='Enter')auth()});q('#logout').onclick=function(){sessionStorage.removeItem(SESSION);showAuth()};
 
-function setTab(name){qa('[data-tab]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===name)});qa('.panel-view').forEach(function(p){p.classList.add('hidden')});q('#tab-'+name).classList.remove('hidden');if(name==='projects')renderProjects();if(name==='orders')renderOrders();if(name==='bays')renderBays()}
+function setTab(name){qa('[data-tab]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===name)});qa('.panel-view').forEach(function(p){p.classList.add('hidden')});q('#tab-'+name).classList.remove('hidden');if(name==='projects')renderProjects();if(name==='orders')renderOrders();if(name==='bays')renderBays();if(name==='parts')renderPartsOrders()}
 qa('[data-tab]').forEach(function(b){b.onclick=function(){setTab(b.getAttribute('data-tab'))}});
 
-function renderAll(){renderProjects();renderOrders();renderBays()}
+function renderAll(){renderProjects();renderOrders();renderBays();renderPartsOrders()}
 function activeProjects(){return C.listProjects().filter(function(p){return !p.convertedOrderId})}
 function renderProjects(){var list=activeProjects();q('#project-count').textContent=list.length+' oczekujących';q('#project-list').innerHTML=list.length?list.map(function(p){return '<div class="project-row" data-project="'+C.esc(p.id)+'"><div><b>'+C.esc(p.id)+'</b><small>'+new Date(p.createdAt).toLocaleString('pl-PL')+'</small></div><div><b>'+C.esc(p.vehicle.name)+'</b><small>'+C.esc(p.vehicle.pack)+'</small></div><div><b>'+C.esc(p.client)+'</b><small>'+C.esc(C.formatReg(p.registration))+'</small></div><div><span class="status-pill">PROJEKT</span></div><div>›</div></div>'}).join(''):'<div class="mini-empty">Brak projektów oczekujących.</div>';qa('[data-project]').forEach(function(el){el.onclick=function(){openProject(el.getAttribute('data-project'))}})}
 q('#import-project').onclick=function(){try{var p=C.parseProjectCode(q('#project-code').value.trim());if(!p||!p.id||!p.vehicle)throw new Error('BAD');var all=C.listProjects();if(all.some(function(x){return x.id===p.id}))return toast('Ten projekt już jest zapisany.');C.saveProject(p);q('#project-code').value='';renderProjects();toast('Projekt klienta zaimportowany.')}catch(e){toast('Nieprawidłowy kod projektu.')}};
@@ -51,3 +53,16 @@ function renderBays(){var active=C.listOrders().filter(function(o){return o.stat
 
 if(sessionStorage.getItem(SESSION)==='1'&&C.ownerPinExists())showApp();else showAuth();
 })();
+function getPartsOrders(){try{return JSON.parse(localStorage.getItem(PARTS_KEY)||'[]')}catch(e){return[]}}
+function savePartsOrders(a){localStorage.setItem(PARTS_KEY,JSON.stringify(a))}
+function renderPartsOrders(){
+ var orderSel=q('#parts-order-id'),catSel=q('#parts-category');if(!orderSel||!catSel)return;
+ var orders=C.listOrders().filter(function(o){return o.status!=='WYDANE'});
+ orderSel.innerHTML='<option value="">Wybierz zlecenie...</option>'+orders.map(function(o){return '<option value="'+C.esc(o.id)+'">'+C.esc(o.id+' — '+o.vehicle.name+' — '+C.formatReg(o.registration))+'</option>'}).join('');
+ catSel.innerHTML=partCats.map(function(x){return '<option value="'+x.id+'">'+x.id+'. '+C.esc(x.name)+'</option>'}).join('');
+ var a=getPartsOrders();q('#parts-count').textContent=a.length+' zapisanych';
+ q('#parts-list').innerHTML=a.length?a.map(function(x,i){return '<div class="order-row" style="grid-template-columns:1.15fr 1.5fr 1fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>Ilość: '+x.qty+'</small></div><div><span class="status-pill">'+C.esc(x.state)+'</span><small>/trigger hsc_part set '+x.category+'</small></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">Akcja</button></div></div>'}).join(''):'<div class="mini-empty">Brak zapisanych zamówień części.</div>';
+ qa('[data-part-action]').forEach(function(b){b.onclick=function(){openPartsAction(Number(b.getAttribute('data-part-action')))}})
+}
+function openPartsAction(i){var a=getPartsOrders(),x=a[i];if(!x)return;var cmd='/trigger hsc_part set '+x.category;modal('<div class="eyebrow">DOSTAWA CZĘŚCI</div><h2 style="margin-top:0">'+C.esc(x.name)+'</h2><div class="detail-grid"><div class="detail-box"><span>Zlecenie</span><b>'+C.esc(x.orderId)+'</b></div><div class="detail-box"><span>Kategoria</span><b>'+C.esc(x.categoryName)+'</b></div></div><label class="field-label" style="margin-top:15px">KOMENDA DATAPACKA</label><input id="parts-command" class="input" readonly value="'+C.esc(cmd)+'"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button id="copy-parts-command" class="btn ghost">Kopiuj komendę</button><button id="mark-parts-sent" class="btn primary">Oznacz: W DRODZE</button></div><button id="remove-parts-order" class="btn danger wide" style="margin-top:8px">Usuń wpis</button>');setTimeout(function(){q('#copy-parts-command').onclick=function(){var t=q('#parts-command');t.select();document.execCommand('copy');toast('Skopiowano komendę.')};q('#mark-parts-sent').onclick=function(){x.state='W DRODZE';savePartsOrders(a);closeModal();renderPartsOrders();toast('Dostawa oznaczona jako uruchomiona.')};q('#remove-parts-order').onclick=function(){a.splice(i,1);savePartsOrders(a);closeModal();renderPartsOrders()}},0)}
+if(q('#parts-create'))q('#parts-create').onclick=function(){var oid=q('#parts-order-id').value,name=q('#parts-name').value.trim(),cat=Number(q('#parts-category').value),qty=Math.max(1,Number(q('#parts-qty').value)||1);if(!oid)return toast('Wybierz zlecenie.');if(!name)return toast('Wpisz nazwę części.');var c=partCats.find(function(x){return x.id===cat});var a=getPartsOrders();a.unshift({id:'PART-'+Date.now(),orderId:oid,category:cat,categoryName:c.name,name:name,qty:qty,state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});savePartsOrders(a);q('#parts-name').value='';q('#parts-qty').value='1';renderPartsOrders();toast('Zamówienie części zapisane.')}
