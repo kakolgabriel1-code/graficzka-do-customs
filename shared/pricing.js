@@ -2,26 +2,26 @@ window.HSCPricing=(function(){
 'use strict';
 
 var servicePrices={
-  diagnostyka:{name:'Diagnostyka pełna',price:1500},
-  kola:{name:'Serwis kół / felg',price:2000},
-  zawieszenie:{name:'Serwis zawieszenia',price:3000},
-  hamulce:{name:'Serwis hamulców',price:2500},
-  lakiernia:{name:'Lakiernia / zmiana lakieru',price:4000},
-  detailing:{name:'Detailing / przygotowanie auta',price:1500}
+  diagnostyka:{name:'Diagnostyka pełna',price:750},
+  kola:{name:'Serwis kół / felg',price:1000},
+  zawieszenie:{name:'Serwis zawieszenia',price:1500},
+  hamulce:{name:'Serwis hamulców',price:1250},
+  lakiernia:{name:'Lakiernia / zmiana lakieru',price:2000},
+  detailing:{name:'Detailing / przygotowanie auta',price:750}
 };
 
 var categoryPrices={
-  'Bodykit':1500,
-  'Exterior':1500,
-  'Interior':1500,
-  'Instruments':1500,
-  'Wheels / Rims':2000,
-  'Tires':2000,
-  'Brakes':2500,
-  'Suspension':3000,
-  'Engine upgrades':3000,
-  'Performance':3000,
-  'Nitrous':3000
+  'Bodykit':750,
+  'Exterior':750,
+  'Interior':750,
+  'Instruments':750,
+  'Wheels / Rims':1000,
+  'Tires':1000,
+  'Brakes':1250,
+  'Suspension':1500,
+  'Engine upgrades':1500,
+  'Performance':1500,
+  'Nitrous':1500
 };
 
 function money(n){
@@ -52,14 +52,14 @@ function calculate(parts,services){
 }
 function publicTable(){
   return [
-    ['Diagnostyka pełna',1500],
-    ['Koła / felgi — serwis lub montaż',2000],
-    ['Hamulce — serwis lub montaż',2500],
-    ['Zawieszenie — serwis lub montaż',3000],
-    ['Lakiernia / zmiana lakieru',4000],
-    ['Zwykła część / element nadwozia / wnętrza',1500],
-    ['Modyfikacja silnika / turbo / performance',3000],
-    ['Detailing / przygotowanie auta',1500]
+    ['Diagnostyka pełna',750],
+    ['Koła / felgi — serwis lub montaż',1000],
+    ['Hamulce — serwis lub montaż',1250],
+    ['Zawieszenie — serwis lub montaż',1500],
+    ['Lakiernia / zmiana lakieru',2000],
+    ['Zwykła część / element nadwozia / wnętrza',750],
+    ['Modyfikacja silnika / turbo / performance',1500],
+    ['Detailing / przygotowanie auta',750]
   ]
 }
 
