@@ -96,7 +96,7 @@
           <label class="field-label">TYP REJESTRACJI</label>
           <select id="reg-kind" class="input">
             <option value="LATIN">Zwykła / europejska</option>
-            <option value="JP">Japońska — wybierana bez japońskiej klawiatury</option>
+            <option value="JP">Japońska — np. 品川 330 さ 85-15</option>
             <option value="CN">Chińska — wybierana bez chińskiej klawiatury</option>
           </select>
 
@@ -105,14 +105,33 @@
           </div>
 
           <div id="reg-jp" class="hidden">
-            <div class="reg-cn">
-              <select id="jp-region" class="input"></select>
-              <input id="jp-class" class="input" maxlength="3" value="330" placeholder="330">
-              <select id="jp-kana" class="input"></select>
+            <div class="note" style="margin-bottom:10px">
+              Dla tablicy z papierów <b>品川 330 さ 85-15</b> wybierz:
+              <b>Shinagawa</b> • <b>330</b> • kod kana <b>SA</b> • <b>85-15</b>.
             </div>
-            <input id="jp-serial" class="input" maxlength="5" placeholder="85-15" style="margin-top:8px">
+            <div class="reg-grid">
+              <div>
+                <label class="field-label">REGION / OKRĘG</label>
+                <select id="jp-region" class="input"></select>
+              </div>
+              <div>
+                <label class="field-label">KLASA</label>
+                <input id="jp-class" class="input" maxlength="3" value="330" placeholder="330">
+              </div>
+            </div>
+            <div class="reg-grid" style="margin-top:8px">
+              <div>
+                <label class="field-label">KOD ZNAKU KANA</label>
+                <input id="jp-kana" class="input" maxlength="3" value="SA" placeholder="np. SA" list="jp-kana-list">
+                <datalist id="jp-kana-list"></datalist>
+              </div>
+              <div>
+                <label class="field-label">NUMER</label>
+                <input id="jp-serial" class="input" maxlength="5" value="85-15" placeholder="85-15">
+              </div>
+            </div>
             <div id="jp-preview" class="plate-preview">品川 330 さ 85-15</div>
-            <div class="note">Nie wpisujesz japońskich znaków ręcznie. Wybierasz region i znak kana z listy, a strona sama zapisuje pełną rejestrację oraz wersję łacińską do bazy.</div>
+            <div class="note">Nie potrzebujesz japońskiej klawiatury. W polu kana wpisujesz łaciński kod, np. <b>SA</b>, a strona zamienia go na znak <b>さ</b>.</div>
           </div>
 
           <div id="reg-cn" class="hidden">
@@ -147,8 +166,8 @@
   <script src="../data-parts-3.js"></script>
   <script src="../data-parts-4.js"></script>
   <script src="../data-parts-5.js"></script>
-  <script src="../shared/hsc-common.js"></script>
-  <script src="../shared/i18n-pl.js"></script>
-  <script src="client.js"></script>
+  <script src="../shared/hsc-common.js?v=4"></script>
+  <script src="../shared/i18n-pl.js?v=4"></script>
+  <script src="client.js?v=4"></script>
 </body>
 </html>
