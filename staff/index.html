@@ -49,6 +49,7 @@
         <button data-tab="projects" class="active">Projekty klientów</button>
         <button data-tab="orders">Zlecenia</button>
         <button data-tab="bays">Stanowiska</button>
+        <button data-tab="parts">Zamawianie części</button>
       </div>
 
       <section id="tab-projects" class="panel-view">
@@ -78,6 +79,28 @@
 
       <section id="tab-bays" class="panel-view hidden">
         <div id="bay-grid" class="bay-grid"></div>
+      </section>
+
+      <section id="tab-parts" class="panel-view hidden">
+        <div class="staff-columns">
+          <div class="card" style="padding:18px">
+            <div class="section-title"><div><span class="section-icon">▤</span><h3>Nowe zamówienie części</h3></div><small>strona + fizyczna dostawa datapacka</small></div>
+            <label class="field-label">ZLECENIE</label>
+            <select id="parts-order-id" class="input"></select>
+            <label class="field-label" style="margin-top:12px">KATEGORIA DOSTAWY</label>
+            <select id="parts-category" class="input"></select>
+            <label class="field-label" style="margin-top:12px">CZĘŚĆ / OPIS</label>
+            <input id="parts-name" class="input" placeholder="np. sportowy zestaw turbo SR20DET">
+            <label class="field-label" style="margin-top:12px">ILOŚĆ</label>
+            <input id="parts-qty" class="input" type="number" min="1" max="64" value="1">
+            <button id="parts-create" class="btn primary wide" style="margin-top:14px">ZAPISZ ZAMÓWIENIE</button>
+            <div class="note">WebDisplays nie może sam wykonać komendy Minecrafta. Po zapisaniu strona poda dokładną komendę datapacka. To jest obecny most między stroną a serwerem bez własnego moda-bridge.</div>
+          </div>
+          <div class="card" style="padding:18px">
+            <div class="section-title"><div><span class="section-icon">↧</span><h3>Aktywne dostawy</h3></div><small id="parts-count">0</small></div>
+            <div id="parts-list" class="order-list"></div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
