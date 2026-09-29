@@ -2,7 +2,7 @@
 'use strict';
 var C=window.HSCCommon,T=window.HSCI18N,B=window.HSCBackend,P=window.HSCPricing,R=window.HSCPartRules,DATA=window.HSC_DATA||{vehicles:[],parts:[]},vehicles=DATA.vehicles||[];
 DATA.parts=DATA.parts||[];
-var state={vehicle:null,paint:null,parts:[],services:[],pack:'all',cat:'all'};
+var state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};
 var services=[
  {id:'diagnostyka',name:'Diagnostyka pełna',desc:'Sprawdzenie auta i części po przyjęciu.'},
  {id:'kola',name:'Serwis kół / felg',desc:'Montaż i ustawienie zgodnie z możliwościami moda.'},
@@ -31,7 +31,7 @@ function renderPriceList(){
 }
 function renderFilters(){var packs=['all','GT Craft','New Cars','BRCC'];q('#pack-filters').innerHTML=packs.map(function(p){return '<button class="filter-chip '+(state.pack===p?'active':'')+'" data-pack="'+p+'">'+(p==='all'?'Wszystkie':p)+'</button>'}).join('');qa('[data-pack]').forEach(function(b){b.onclick=function(){state.pack=b.getAttribute('data-pack');renderFilters();renderVehicles()}})}
 function renderVehicles(){var term=q('#vehicle-search').value.trim().toLowerCase();var list=vehicles.filter(function(v){return (state.pack==='all'||v.pack===state.pack)&&(!term||(v.name+' '+v.id+' '+v.category).toLowerCase().indexOf(term)>=0)});q('#vehicle-list').innerHTML=list.map(function(v){return '<button class="vehicle-item '+(state.vehicle&&state.vehicle.id===v.id?'active':'')+'" data-v="'+v.id+'"><b>'+C.esc(v.name)+'</b><small>'+v.id+' • '+C.esc(v.pack)+'</small></button>'}).join('')||'<div class="mini-empty">Brak wyników.</div>';qa('[data-v]').forEach(function(b){b.onclick=function(){selectVehicle(b.getAttribute('data-v'))}})}
-function selectVehicle(id){state.vehicle=vehicles.find(function(v){return v.id===id});state.paint=null;state.parts=[];state.services=[];state.cat='all';renderVehicles();renderConfig();renderSummary()}
+function selectVehicle(id){state.vehicle=vehicles.find(function(v){return v.id===id});state.paint=null;state.parts=[];state.partColors={};state.services=[];state.cat='all';renderVehicles();renderConfig();renderSummary()}
 function renderConfig(){var v=state.vehicle;if(!v){q('#vehicle-empty').classList.remove('hidden');q('#vehicle-config').classList.add('hidden');return}q('#vehicle-empty').classList.add('hidden');q('#vehicle-config').classList.remove('hidden');q('#selected-pack').textContent=v.pack;q('#selected-name').textContent=v.name;q('#selected-id').textContent=v.id+' • '+T.vcategory(v.category);
  var cs=v.colors||[];q('#paint-options').innerHTML=cs.length?cs.map(function(c){var col=colors[String(c).toLowerCase()]||'#b66cff';return '<button data-color="'+C.esc(c)+'" class="'+(state.paint===c?'active':'')+'"><span class="color-dot" style="background:'+col+'"></span>'+C.esc(T.color(c))+'</button>'}).join(''):'<span class="muted">Brak osobnych wariantów lakieru.</span>';qa('[data-color]').forEach(function(b){b.onclick=function(){
   state.paint=b.getAttribute('data-color');
@@ -64,6 +64,17 @@ function renderParts(){
   var desc=R?R.description(p.category,p.name):'';
   var app=R?R.appearance(p.category,p.name):'';
   var slot=R?R.slotLabel(p.category,p.name):'';
+  var colors=R?R.colorOptions(p.category,p.name):[];
+  var colorSelect='';
+  if(on&&colors.length){
+    var current=state.partColors[key]||'';
+    colorSelect='<div class="part-color-box" style="margin-top:9px" onclick="event.stopPropagation()">'+
+      '<label class="field-label" style="margin-bottom:5px">KOLOR / WARIANT</label>'+
+      '<select class="input part-color-select" data-color-key="'+encodeURIComponent(key)+'">'+
+      '<option value="">Wybierz kolor...</option>'+
+      colors.map(function(col){return '<option value="'+C.esc(col)+'" '+(current===col?'selected':'')+'>'+C.esc(col)+'</option>'}).join('')+
+      '</select></div>'
+  }
   var blockText=blocked?'<small style="display:block;margin-top:7px;color:#ff9da8"><b>Zajęte:</b> '+C.esc(T.part(conflict.name))+' — najpierw odznacz tę część.</small>':'';
   return '<article class="mod-card '+(on?'selected ':'')+(blocked?'blocked':'')+'" data-part="'+encodeURIComponent(key)+'" style="'+(blocked?'opacity:.62;':'')+'">'+
    '<span class="check">'+(on?'✓':'')+'</span>'+
@@ -72,6 +83,7 @@ function renderParts(){
    '<small>'+C.esc(T.category(p.category))+' • slot: '+C.esc(slot)+'</small>'+
    '<small style="display:block;margin-top:7px;line-height:1.45;color:#a99ab3">'+C.esc(desc)+'</small>'+
    '<small style="display:block;margin-top:5px;line-height:1.45;color:#c6afd4">'+C.esc(app)+'</small>'+
+   colorSelect+
    '<strong style="display:block;margin-top:8px;color:#ddb0ff">'+C.esc(priceText)+'</strong>'+
    blockText+
    '</article>'
@@ -81,6 +93,7 @@ function renderParts(){
    var key=decodeURIComponent(el.getAttribute('data-part')),a=key.split('|'),cat=a.shift(),name=a.join('|'),i=state.parts.indexOf(key);
    if(i>=0){
     state.parts.splice(i,1);
+    delete state.partColors[key];
     renderParts();renderSummary();return
    }
    var conflict=R?R.findConflict(state.parts,cat,name):null;
@@ -91,6 +104,14 @@ function renderParts(){
    state.parts.push(key);
    renderParts();renderSummary()
   }
+ });
+ qa('.part-color-select').forEach(function(sel){
+   sel.onchange=function(){
+     var key=decodeURIComponent(sel.getAttribute('data-color-key'));
+     state.partColors[key]=sel.value;
+     renderSummary()
+   };
+   sel.onclick=function(e){e.stopPropagation()}
  })
 }
 function renderServices(){
@@ -120,7 +141,8 @@ function renderSummary(){
  if(state.paint)rows.push({n:'Lakier: '+T.color(state.paint),m:'nadwozie'});
  state.parts.forEach(function(k){
   var a=k.split('|'),cat=a.shift(),name=a.join('|'),price=P?P.partPrice(cat,name):0;
-  rows.push({n:T.part(name),m:T.category(cat)+' • '+(P?P.money(price):String(price)+' $')})
+  var color=state.partColors[k]||'';
+  rows.push({n:T.part(name)+(color?' — '+color:''),m:T.category(cat)+' • '+(P?P.money(price):String(price)+' $')})
  });
  state.services.forEach(function(id){
   var s=services.find(function(x){return x.id===id});
@@ -142,8 +164,12 @@ async function saveProject(){
  if(!state.vehicle)return toast('Najpierw wybierz auto.');
  var client=q('#client-name').value.trim();if(!client)return toast('Wpisz swój nick.');
  var digits=q('#client-reg').value.replace(/\D/g,'');if(digits.length!==4)return toast('Wpisz 4 cyfry rejestracji Chicago.');
+ for(var ci=0;ci<state.parts.length;ci++){
+   var ck=state.parts[ci],ca=ck.split('|'),ccat=ca.shift(),cname=ca.join('|'),opts=R?R.colorOptions(ccat,cname):[];
+   if(opts.length&&!state.partColors[ck])return toast('Wybierz kolor / wariant dla: '+T.part(cname));
+ }
  var reg=C.makeChicagoReg(digits),tracking=C.trackingCode();
- var priced=P?P.calculate(state.parts,state.services):{total:0,mechanicCut:0,workshopCut:0};var project={id:C.projectId(),trackingCode:tracking,createdAt:new Date().toISOString(),status:'PROJEKT KLIENTA',client:client,registration:reg,vehicle:{id:state.vehicle.id,name:state.vehicle.name,pack:state.vehicle.pack,itemId:state.vehicle.itemId},paint:state.paint,parts:state.parts.map(function(k){var a=k.split('|');return{category:a.shift(),name:a.join('|')}}),services:state.services.map(function(id){var s=services.find(function(x){return x.id===id});return s?s.name:id}),priceTotal:priced.total,mechanicCut:priced.mechanicCut,workshopCut:priced.workshopCut,note:q('#client-note').value.trim(),history:[{at:new Date().toISOString(),text:'Zlecenie przygotowane przez klienta. Podejdź do recepcji Hood Stories Customs.'}]};
+ var priced=P?P.calculate(state.parts,state.services):{total:0,mechanicCut:0,workshopCut:0};var project={id:C.projectId(),trackingCode:tracking,createdAt:new Date().toISOString(),status:'PROJEKT KLIENTA',client:client,registration:reg,vehicle:{id:state.vehicle.id,name:state.vehicle.name,pack:state.vehicle.pack,itemId:state.vehicle.itemId},paint:state.paint,parts:state.parts.map(function(k){var a=k.split('|'),cat=a.shift(),name=a.join('|');return{category:cat,name:name,color:state.partColors[k]||null}}),services:state.services.map(function(id){var s=services.find(function(x){return x.id===id});return s?s.name:id}),priceTotal:priced.total,mechanicCut:priced.mechanicCut,workshopCut:priced.workshopCut,note:q('#client-note').value.trim(),history:[{at:new Date().toISOString(),text:'Zlecenie przygotowane przez klienta. Podejdź do recepcji Hood Stories Customs.'}]};
  C.saveProject(project);
  try{if(B)await B.submitProject(project)}catch(e){console.warn(e)}
  var code=C.projectCode(project);
@@ -163,7 +189,7 @@ async function checkStatus(){
 }
 q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('keydown',function(e){if(e.key==='Enter')checkStatus()});
 
-function clearAll(){state={vehicle:null,paint:null,parts:[],services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
+function clearAll(){state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
 q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;q('#clear-build').onclick=clearAll;
 renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();
 })();
