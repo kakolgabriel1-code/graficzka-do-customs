@@ -186,6 +186,46 @@ var rimColors={
  'Yokohama AVS Model T5':'bazowy, czarny, srebrny'
 };
 
+function colorOptions(category,name){
+  var c=String(category||''),n=String(name||''),l=low(n),s=slot(c,n);
+
+  if(c==='Wheels / Rims' && rimColors[n]){
+    return rimColors[n].split(',').map(function(x){return x.trim()}).filter(Boolean);
+  }
+
+  if(c==='Tires') return ['czarny','czarny z oznaczeniem / naklejką'];
+  if(s==='engine:air-cleaner'){
+    if(/racing/i.test(n)&&!/semi/i.test(n)) return ['niebieski','czerwony','zielony','fioletowy','żółty','biały'];
+    if(/semiracing/i.test(n)) return ['czerwony','niebieski','zielony','fioletowy','żółty','biały'];
+    return ['żółty','niebieski','zielony','fioletowy'];
+  }
+  if(s==='exterior:towing-hook') return ['bazowy','czerwony','biały','niebieski','limonkowy','pomarańczowy'];
+
+  if(s==='interior:steering-wheel'){
+    if(/momo retro/i.test(n)) return ['czarny + srebrne ramiona'];
+    if(/momo prototipo/i.test(n)) return ['czarny + srebrne ramiona','czarny'];
+    if(/momo steeringwheel 1/i.test(n)) return ['czarny / ciemnoszary'];
+    if(/momo steeringwheel 2/i.test(n)) return ['ciemny'];
+    if(/momo tuner/i.test(n)) return ['bazowy','ciemnoszary','srebrny'];
+    if(/^momo steering$/i.test(n)) return ['niebieski akcent','czerwony akcent','pomarańczowy akcent','biały akcent'];
+    return [];
+  }
+  if(s==='interior:front-seats'){
+    if(/recaro|sparco/i.test(n)) return ['bazowy','czarny','niebieski','biały','srebrny','żółty','zielony','różowy'];
+    return [];
+  }
+  if(s==='interior:rear-seats') return ['bazowy','czerwony','niebieski'];
+  if(s==='interior:roll-cage') return ['bazowy','czerwony','niebieski','biały','żółty'];
+  if(s==='interior:shift-lever'){
+    if(/type2/i.test(n)) return ['bazowy','czerwony','niebieski','srebrny','czarny','brązowy'];
+    return ['bazowy','czerwony','niebieski','srebrny','fioletowy'];
+  }
+  if(s==='interior:handbrake') return ['bazowy','czerwony','niebieski','srebrny','fioletowy'];
+  if(s==='performance:towerbar') return ['czerwony','niebieski','zielony','fioletowy','żółty','biały','czarny'];
+
+  return [];
+}
+
 function appearance(category,name){
   var c=String(category||''),n=String(name||''),l=low(n),s=slot(c,n);
   if(c==='Bodykit') return 'Kolor: dopasowany do lakieru / tekstury nadwozia auta.';
@@ -251,5 +291,5 @@ function validateParts(parts){
   return conflicts
 }
 
-return {slot:slot,slotLabel:slotLabel,description:description,appearance:appearance,findConflict:findConflict,validateParts:validateParts};
+return {slot:slot,slotLabel:slotLabel,description:description,appearance:appearance,colorOptions:colorOptions,findConflict:findConflict,validateParts:validateParts};
 })();
