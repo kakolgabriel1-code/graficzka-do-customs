@@ -24,8 +24,11 @@ function setView(v){qa('.client-view').forEach(function(x){x.classList.add('hidd
 qa('[data-client-view]').forEach(function(b){b.onclick=function(){setView(b.getAttribute('data-client-view'))}});
 function renderPriceList(){
  if(!P||!q('#price-list'))return;
- q('#price-list').innerHTML=P.publicTable().map(function(x){return '<div class="detail-box"><span>'+C.esc(x[0])+'</span><b>'+P.money(x[1])+'</b></div>'}).join('')
+ q('#price-list').innerHTML=P.publicTable().map(function(x){
+  return '<div class="detail-box"><span>'+C.esc(x[0])+'</span><b>'+P.money(x[1])+'</b></div>'
+ }).join('')
 }
+
 
 function renderFilters(){var packs=['all','GT Craft','New Cars','BRCC'];q('#pack-filters').innerHTML=packs.map(function(p){return '<button class="filter-chip '+(state.pack===p?'active':'')+'" data-pack="'+p+'">'+(p==='all'?'Wszystkie':p)+'</button>'}).join('');qa('[data-pack]').forEach(function(b){b.onclick=function(){state.pack=b.getAttribute('data-pack');renderFilters();renderVehicles()}})}
 function renderVehicles(){var term=q('#vehicle-search').value.trim().toLowerCase();var list=vehicles.filter(function(v){return (state.pack==='all'||v.pack===state.pack)&&(!term||(v.name+' '+v.id+' '+v.category).toLowerCase().indexOf(term)>=0)});q('#vehicle-list').innerHTML=list.map(function(v){return '<button class="vehicle-item '+(state.vehicle&&state.vehicle.id===v.id?'active':'')+'" data-v="'+v.id+'"><b>'+C.esc(v.name)+'</b><small>'+v.id+' • '+C.esc(v.pack)+'</small></button>'}).join('')||'<div class="mini-empty">Brak wyników.</div>';qa('[data-v]').forEach(function(b){b.onclick=function(){selectVehicle(b.getAttribute('data-v'))}})}
@@ -51,7 +54,7 @@ async function saveProject(){
  C.saveProject(project);
  try{if(B)await B.submitProject(project)}catch(e){console.warn(e)}
  var code=C.projectCode(project);
- modal('<div class="eyebrow">ZLECENIE UTWORZONE</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="note" style="font-size:13px;line-height:1.7"><b>CO ROBISZ TERAZ:</b><br>1. Kliknij <b>KOPIUJ KOD DLA MECHANIKA</b>.<br>2. Wyślij cały kod mechanikowi na czacie Minecraft albo Discordzie.<br>3. Podejdź do <b>RECEPCJI Hood Stories Customs</b>.<br>4. U recepcjonisty kliknij <b>MAM GOTOWE ZLECENIE</b>.<br>5. Zostań przy recepcji. Mechanik powie ci, kiedy masz podjechać autem na stanowisko 1.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):project.priceTotal+' </div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA</label><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD DLA MECHANIKA</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
+ modal('<div class="eyebrow">ZLECENIE UTWORZONE</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="note" style="font-size:13px;line-height:1.7"><b>CO ROBISZ TERAZ:</b><br>1. Kliknij <b>KOPIUJ KOD DLA MECHANIKA</b>.<br>2. Wyślij cały kod mechanikowi na czacie Minecraft albo Discordzie.<br>3. Podejdź do <b>RECEPCJI Hood Stories Customs</b>.<br>4. U recepcjonisty kliknij <b>MAM GOTOWE ZLECENIE</b>.<br>5. Zostań przy recepcji. Mechanik powie ci, kiedy masz podjechać autem na stanowisko 1.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):String(project.priceTotal)+' $')+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA</label><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD DLA MECHANIKA</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
  setTimeout(function(){q('#copy-project').onclick=function(){copy(code)};q('#copy-track').onclick=function(){copy(tracking)}},0)
 }
 
@@ -70,23 +73,4 @@ q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('k
 function clearAll(){state={vehicle:null,paint:null,parts:[],services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
 q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;q('#clear-build').onclick=clearAll;
 renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();
-})();)+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA</label><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD DLA MECHANIKA</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
- setTimeout(function(){q('#copy-project').onclick=function(){copy(code)};q('#copy-track').onclick=function(){copy(tracking)}},0)
-}
-
-async function checkStatus(){
- var code=q('#tracking-code').value.trim().toUpperCase();if(!code)return toast('Wpisz kod śledzenia.');
- q('#status-result').innerHTML='<div class="note">Sprawdzanie...</div>';
- try{
-   var o=B?await B.publicStatus(code):null;
-   if(!o){q('#status-result').innerHTML='<div class="note">Nie znaleziono zlecenia. Jeżeli mechanik jeszcze nie utworzył oficjalnego zlecenia, poczekaj przy recepcji.</div>';return}
-   var status=o.status||'PRZYJĘCIE',bay=o.bay||'—',hist=o.history||[];
-   q('#status-result').innerHTML='<div class="card" style="padding:18px"><div class="status-big">'+C.esc(status)+'</div><div class="detail-grid" style="margin-top:12px"><div class="detail-box"><span>Auto</span><b>'+C.esc((o.vehicle&&o.vehicle.name)||'—')+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(o.registration))+'</b></div><div class="detail-box"><span>Stanowisko</span><b>'+C.esc(bay)+'</b></div><div class="detail-box"><span>Płatność</span><b>'+C.esc(o.paymentStatus||'NIEOPŁACONE')+'</b></div></div><h3 style="margin-bottom:8px">Wiadomości z warsztatu</h3><div class="message-list">'+(hist.length?hist.slice().reverse().map(function(m){return '<div class="message"><b>'+new Date(m.at).toLocaleString('pl-PL')+'</b><span>'+C.esc(m.text)+'</span></div>'}).join(''):'<div class="mini-empty">Brak wiadomości.</div>')+'</div></div>';
- }catch(e){q('#status-result').innerHTML='<div class="note">Nie udało się pobrać statusu. Status online między dwoma komputerami wymaga podłączonej wspólnej bazy HSC.</div>'}
-}
-q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('keydown',function(e){if(e.key==='Enter')checkStatus()});
-
-function clearAll(){state={vehicle:null,paint:null,parts:[],services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
-q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;q('#clear-build').onclick=clearAll;
-renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();
 })();
