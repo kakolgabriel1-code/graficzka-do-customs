@@ -96,11 +96,23 @@
           <label class="field-label">TYP REJESTRACJI</label>
           <select id="reg-kind" class="input">
             <option value="LATIN">Zwykła / europejska</option>
+            <option value="JP">Japońska — wybierana bez japońskiej klawiatury</option>
             <option value="CN">Chińska — wybierana bez chińskiej klawiatury</option>
           </select>
 
           <div id="reg-latin">
             <input id="client-reg" class="input" placeholder="np. CHI 0421">
+          </div>
+
+          <div id="reg-jp" class="hidden">
+            <div class="reg-cn">
+              <select id="jp-region" class="input"></select>
+              <input id="jp-class" class="input" maxlength="3" value="330" placeholder="330">
+              <select id="jp-kana" class="input"></select>
+            </div>
+            <input id="jp-serial" class="input" maxlength="5" placeholder="85-15" style="margin-top:8px">
+            <div id="jp-preview" class="plate-preview">品川 330 さ 85-15</div>
+            <div class="note">Nie wpisujesz japońskich znaków ręcznie. Wybierasz region i znak kana z listy, a strona sama zapisuje pełną rejestrację oraz wersję łacińską do bazy.</div>
           </div>
 
           <div id="reg-cn" class="hidden">
