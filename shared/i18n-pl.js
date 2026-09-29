@@ -1,7 +1,7 @@
 window.HSCI18N=(function(){
 'use strict';
 var cat={
- 'Bodykit':'Nadwozie / bodykit',
+ 'Bodykit':'Nadwozie / pakiet karoserii',
  'Brakes':'Hamulce',
  'Engine upgrades':'Modyfikacje silnika',
  'Exterior':'Elementy zewnętrzne',
