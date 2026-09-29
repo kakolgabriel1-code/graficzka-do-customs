@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var C=window.HSCCommon,T=window.HSCI18N,B=window.HSCBackend,P=window.HSCPricing;
+var C=window.HSCCommon,T=window.HSCI18N,B=window.HSCBackend,P=window.HSCPricing,R=window.HSCPartRules;
 var DATA=window.HSC_DATA||{vehicles:[],parts:[]};DATA.parts=DATA.parts||[];
 var SESSION='hsc_staff_session_v1',PARTS_KEY='hsc_parts_orders_v2';
 var statuses=['PRZYJĘCIE','W TRAKCIE','GOTOWE DO ODBIORU','WYDANE'];
@@ -42,9 +42,25 @@ function openProject(id){
  setTimeout(function(){
    function redraw(){q('#project-parts').innerHTML=(p.parts||[]).map(function(x,i){return '<span>'+C.esc(T.part(x.name))+' <button data-rm-part="'+i+'" style="border:0;background:transparent;color:#e89aff;cursor:pointer">×</button></span>'}).join('')||'<span>Brak wybranych części</span>';qa('[data-rm-part]').forEach(function(b){b.onclick=function(){p.parts.splice(Number(b.getAttribute('data-rm-part')),1);redraw()}})}
    redraw();
-   q('#add-part-btn').onclick=function(){var v=q('#add-part').value;if(!v)return;var a=v.split('|');p.parts=p.parts||[];p.parts.push({category:a.shift(),name:a.join('|')});q('#add-part').selectedIndex=0;redraw()};
+   q('#add-part-btn').onclick=function(){
+ var v=q('#add-part').value;if(!v)return;
+ var a=v.split('|'),cat=a.shift(),name=a.join('|');p.parts=p.parts||[];
+ var keys=p.parts.map(function(x){return x.category+'|'+x.name});
+ var conflict=R?R.findConflict(keys,cat,name):null;
+ if(conflict)return toast('Najpierw usuń „'+T.part(conflict.name)+'”. Ten slot może mieć tylko jeden element.');
+ p.parts.push({category:cat,name:name});q('#add-part').selectedIndex=0;redraw()
+};
    q('#save-project-edit').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();if(P){var calc=P.calculate(p.parts||[],p.services||[]);p.priceTotal=calc.total;p.mechanicCut=calc.mechanicCut;p.workshopCut=calc.workshopCut}C.saveProject(p);closeModal();renderProjects();toast('Poprawki i cena zapisane.')};
-   q('#create-order').onclick=function(){p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();if(P){var calc=P.calculate(p.parts||[],p.services||[]);p.priceTotal=calc.total;p.mechanicCut=calc.mechanicCut;p.workshopCut=calc.workshopCut}createOrderFromProject(p)}
+   q('#create-order').onclick=function(){
+ p.paint=q('#project-paint').value||null;p.note=q('#project-note').value.trim();
+ var conflicts=R?R.validateParts(p.parts||[]):[];
+ if(conflicts.length){
+  var x=conflicts[0];
+  return toast('Konflikt części: „'+T.part(x.a.name)+'” i „'+T.part(x.b.name)+'”. Zostaw tylko jeden element tego slotu.')
+ }
+ if(P){var calc=P.calculate(p.parts||[],p.services||[]);p.priceTotal=calc.total;p.mechanicCut=calc.mechanicCut;p.workshopCut=calc.workshopCut}
+ createOrderFromProject(p)
+}
  },0)
 }
 
