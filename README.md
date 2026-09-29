@@ -1,22 +1,59 @@
-# Hood Stories Customs — WebDisplays UI
+# Hood Stories Customs — WebDisplays
 
-Statyczny frontend przygotowany pod WebDisplays/MCEF i GitHub Pages.
+System został rozdzielony na dwie osobne strony.
 
-## Tryby
-- `#client` — konfigurator klienta
-- `#staff` — panel warsztatu
-- `#status` — lokalny podgląd zlecenia
+## Publiczna strona klienta
+`/client/`
 
-## Logika warsztatu
-- stanowisko 1: przyjęcie auta
-- stanowiska 2–8: uniwersalne stanowiska robocze
-- lakiernia: osobna strefa
-- silnik: zawsze fabryczny; bez swapów
-- GT Craft: strona pokazuje kompatybilne części i dodatki wyciągnięte z paczki (bodykit, interior, koła/felgi, performance, osprzęt silnika itd.)
-- New Cars / BRCC: bez wymyślonych części; pokazywane są wykryte warianty lakieru i usługi
+Klient:
+- wybiera auto,
+- wybiera lakier,
+- wybiera tablicę (BRCC / New Cars),
+- wybiera kompatybilne części / modyfikacje,
+- wpisuje rejestrację,
+- zapisuje **projekt klienta**.
 
-## Dane zleceń
-Obecna wersja zapisuje zlecenia w `localStorage`, więc dane są lokalne dla danej przeglądarki/WebDisplays. Jest kod eksportu/importu HSC1 do przenoszenia zleceń pomiędzy urządzeniami. Do automatycznej synchronizacji klient ↔ pracownik trzeba podpiąć backend/bazę danych (kolejny etap).
+Klient nie tworzy oficjalnego zlecenia.
+
+## HSC Staff OS
+`/staff/`
+
+Pracownik:
+- przechodzi weryfikację,
+- widzi projekty klientów,
+- poprawia projekt po rozmowie i oględzinach auta,
+- dopiero potem tworzy oficjalne zlecenie,
+- przydziela stanowisko,
+- zmienia status,
+- ustala płatność.
+
+Układ warsztatu:
+- stanowisko 1 = przyjęcie auta,
+- stanowiska 2–8 = uniwersalne stanowiska robocze,
+- lakiernia = osobna strefa,
+- silnik = zawsze fabryczny; bez swapów.
+
+## Rejestracje
+Zwykłe rejestracje są zapisywane alfabetem łacińskim.
+
+Dla chińskiej rejestracji klient nie wpisuje chińskiego znaku ręcznie:
+- wybiera region z listy,
+- wpisuje literę i końcówkę,
+- strona generuje np. `京A·12345`,
+- równolegle przechowuje klucz `CN-BJ-A12345`.
+
+## Połączenie stron
+Tryb lokalny już działa na tym samym originie/przeglądarce oraz przez kod projektu `HSCP1`.
+
+Do prawdziwego połączenia między różnymi urządzeniami przygotowany jest backend w katalogu `/supabase/`. Po podpięciu bazy:
+- klient wysyła projekt do wspólnej bazy,
+- pracownik widzi go po zalogowaniu,
+- klient nie ma dostępu do zleceń pracownika,
+- RLS blokuje dostęp do danych staffu bez prawdziwego konta.
 
 ## GitHub Pages
-Ustaw w repozytorium: Settings → Pages → Deploy from a branch → `main` / `(root)`.
+Po włączeniu Pages z gałęzi `main` / root:
+- klient: `https://kakolgabriel1-code.github.io/graficzka-do-customs/client/`
+- staff: `https://kakolgabriel1-code.github.io/graficzka-do-customs/staff/`
+
+Główny adres repo przekierowuje na stronę klienta.
