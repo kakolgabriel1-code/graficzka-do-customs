@@ -3,6 +3,7 @@
 var C=window.HSCCommon,T=window.HSCI18N,B=window.HSCBackend,P=window.HSCPricing,R=window.HSCPartRules,DATA=window.HSC_DATA||{vehicles:[],parts:[]},vehicles=DATA.vehicles||[];
 DATA.parts=DATA.parts||[];
 var state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};
+var currentStep=1;
 var services=[
  {id:'diagnostyka',name:'Diagnostyka pełna',desc:'Skan auta, kontrola podzespołów i raport mechanika.'},
  {id:'kola',name:'Serwis kół / felg',desc:'Kontrola, demontaż i montaż wybranego zestawu.'},
@@ -22,6 +23,18 @@ function fallback(t){var a=document.createElement('textarea');a.value=t;document
 
 function setView(v){qa('.client-view').forEach(function(x){x.classList.add('hidden')});q('#client-'+v).classList.remove('hidden');qa('[data-client-view]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-client-view')===v)});window.scrollTo(0,0)}
 qa('[data-client-view]').forEach(function(b){b.onclick=function(){setView(b.getAttribute('data-client-view'))}});
+function setClientStep(n){
+ currentStep=Math.max(1,Math.min(3,Number(n)||1));
+ if((currentStep===2||currentStep===3)&&!state.vehicle)currentStep=1;
+ qa('[data-client-step]').forEach(function(el){el.classList.toggle('active',Number(el.getAttribute('data-client-step'))===currentStep)});
+ qa('[data-client-step-nav]').forEach(function(el){el.classList.toggle('active',Number(el.getAttribute('data-client-step-nav'))===currentStep)})
+}
+qa('[data-client-step-nav]').forEach(function(b){b.onclick=function(){
+ var n=Number(b.getAttribute('data-client-step-nav'));
+ if(n>1&&!state.vehicle)return toast('Najpierw wybierz auto.');
+ setClientStep(n)
+}});
+
 function renderPriceList(){
  if(!P||!q('#price-list'))return;
  q('#price-list').innerHTML=P.publicTable().map(function(x){
@@ -31,7 +44,7 @@ function renderPriceList(){
 }
 function renderFilters(){var packs=['all','GT Craft','New Cars','BRCC'];q('#pack-filters').innerHTML=packs.map(function(p){return '<button class="filter-chip '+(state.pack===p?'active':'')+'" data-pack="'+p+'">'+(p==='all'?'Wszystkie':p)+'</button>'}).join('');qa('[data-pack]').forEach(function(b){b.onclick=function(){state.pack=b.getAttribute('data-pack');renderFilters();renderVehicles()}})}
 function renderVehicles(){var term=q('#vehicle-search').value.trim().toLowerCase();var list=vehicles.filter(function(v){return (state.pack==='all'||v.pack===state.pack)&&(!term||(v.name+' '+v.id+' '+v.category).toLowerCase().indexOf(term)>=0)});q('#vehicle-list').innerHTML=list.map(function(v){return '<button class="vehicle-item '+(state.vehicle&&state.vehicle.id===v.id?'active':'')+'" data-v="'+v.id+'"><b>'+C.esc(v.name)+'</b><small>'+v.id+' • '+C.esc(v.pack)+'</small></button>'}).join('')||'<div class="mini-empty">Brak wyników.</div>';qa('[data-v]').forEach(function(b){b.onclick=function(){selectVehicle(b.getAttribute('data-v'))}})}
-function selectVehicle(id){state.vehicle=vehicles.find(function(v){return v.id===id});state.paint=null;state.parts=[];state.partColors={};state.services=[];state.cat='all';renderVehicles();renderConfig();renderSummary()}
+function selectVehicle(id){state.vehicle=vehicles.find(function(v){return v.id===id});state.paint=null;state.parts=[];state.partColors={};state.services=[];state.cat='all';renderVehicles();renderConfig();renderSummary();setClientStep(2)}
 function renderConfig(){var v=state.vehicle;if(!v){q('#vehicle-empty').classList.remove('hidden');q('#vehicle-config').classList.add('hidden');return}q('#vehicle-empty').classList.add('hidden');q('#vehicle-config').classList.remove('hidden');q('#selected-pack').textContent=v.pack;q('#selected-name').textContent=v.name;q('#selected-id').textContent=v.id+' • '+T.vcategory(v.category);
  var cs=v.colors||[];q('#paint-options').innerHTML=cs.length?cs.map(function(c){var col=colors[String(c).toLowerCase()]||'#b66cff';return '<button data-color="'+C.esc(c)+'" class="'+(state.paint===c?'active':'')+'"><span class="color-dot" style="background:'+col+'"></span>'+C.esc(T.color(c))+'</button>'}).join(''):'<span class="muted">Brak osobnych wariantów lakieru.</span>';qa('[data-color]').forEach(function(b){b.onclick=function(){
   state.paint=b.getAttribute('data-color');
@@ -139,15 +152,7 @@ function updateClientGuide(){
  var box=q('#client-next-step');if(!box)return;
  var nick=q('#client-name')?q('#client-name').value.trim():'';
  var reg=q('#client-reg')?q('#client-reg').value.replace(/\D/g,''):'';
- if(!state.vehicle){
-  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>1. Wybierz samochód.</b> Po lewej znajdź model z książeczki pojazdu.'
- }else if(!state.parts.length&&!state.services.length&&!state.paint){
-  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>2. Zbuduj projekt.</b> Wybierz lakier, modyfikacje lub usługi. Cena liczy się sama.'
- }else if(!nick||reg.length!==4){
-  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>3. Uzupełnij dane.</b> Wpisz nick z miasta i 4 cyfry rejestracji Chicago z dokumentów auta.'
- }else{
-  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>4. Wyślij projekt.</b> Sprawdź podsumowanie i kliknij „Wyślij projekt do Central CEE”. Potem wyślij kod mechanikowi przez aplikację (Discord) albo czat.'
- }
+ box.innerHTML=(!nick||reg.length!==4)?'<b>Uzupełnij nick i 4 cyfry rejestracji.</b>':'<b>Gotowe.</b> Sprawdź cenę i wyślij projekt.'
 }
 function renderSummary(){
  var rows=[];
@@ -188,7 +193,7 @@ async function saveProject(){
  C.saveProject(project);
  try{if(B)await B.submitProject(project)}catch(e){console.warn(e)}
  var code=C.projectCode(project);
- modal('<div class="eyebrow">CENTRAL CEE • PROJEKT GOTOWY</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="cee-next-step"><span class="rp-label">CO TERAZ ROBISZ W RP</span><b>1.</b> Skopiuj kod dla mechanika.<br><b>2.</b> Wyślij go mechanikowi przez <span class="cee-app-chip">aplikację (Discord)</span> albo czat w mieście.<br><b>3.</b> Podejdź do recepcji Central CEE Customs i zgłoś, że projekt jest gotowy.<br><b>4.</b> Zostań przy recepcji. <b>Nie jedź na halę</b>, dopóki warsztat nie wyśle ci wezwania na stanowisko 1.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):String(project.priceTotal)+' $')+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA • '+code.length+' ZNAKÓW</label><div class="cee-rp-mini" style="margin-bottom:8px">Kod jest teraz skrócony specjalnie pod <b>jedną wiadomość w aplikacji (Discord)</b>. Wyślij go w całości, bez dopisywania niczego w środku.</div><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD I WYŚLIJ PRZEZ APLIKACJĘ</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
+ modal('<div class="eyebrow">CENTRAL CEE • PROJEKT GOTOWY</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="cee-next-step"><b>Teraz:</b> skopiuj kod → wyślij mechanikowi przez <span class="cee-app-chip">aplikację (Discord)</span> → podejdź do recepcji i kliknij <b>MAM GOTOWY PROJEKT</b>.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):String(project.priceTotal)+' $')+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA • '+code.length+' ZNAKÓW</label><div class="cee-rp-mini" style="margin-bottom:8px">Kod jest teraz skrócony specjalnie pod <b>jedną wiadomość w aplikacji (Discord)</b>. Wyślij go w całości, bez dopisywania niczego w środku.</div><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD I WYŚLIJ PRZEZ APLIKACJĘ</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
  setTimeout(function(){q('#copy-project').onclick=function(){copy(code)};q('#copy-track').onclick=function(){copy(tracking)}},0)
 }
 
@@ -222,7 +227,15 @@ async function checkStatus(){
 }
 q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('keydown',function(e){if(e.key==='Enter')checkStatus()});
 
-function clearAll(){state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
-q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;q('#clear-build').onclick=clearAll;
-renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();updateClientGuide();
+function clearAll(){
+ state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};
+ q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';
+ updateReg();renderFilters();renderVehicles();renderConfig();renderSummary();setClientStep(1)
+}
+q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;
+q('#client-back-1').onclick=function(){setClientStep(1)};
+q('#client-next-3').onclick=function(){if(!state.vehicle)return toast('Najpierw wybierz auto.');setClientStep(3)};
+q('#client-back-2').onclick=function(){setClientStep(2)};
+q('#restart-client').onclick=function(){if(confirm('Wyczyścić obecny projekt i zacząć od początku?')){clearAll();setView('create');toast('Nowy projekt rozpoczęty.')}};
+renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();updateClientGuide();setClientStep(1);
 })();
