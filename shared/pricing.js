@@ -116,7 +116,7 @@ function calculate(parts,services){
     rows.push({type:'service',id:rec.id,name:rec.name,price:rec.price,mechanicPayout:payout,workshopShare:rec.price-payout});
     total+=rec.price
   });
-  var mechanicCut=rows.reduce(function(sum,row){return sum+(row.mechanicPayout||0)},0);
+  var mechanicCut=Math.round(total*0.65);
   return {rows:rows,total:total,mechanicCut:mechanicCut,workshopCut:total-mechanicCut}
 }
 
