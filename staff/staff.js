@@ -151,7 +151,7 @@ function centsDeliveryId(name){
  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
  return h&0x7fffffff
 }
-function centsCanDeliver(name){return CENTS_VALID_PART_IDS.has(centsDeliveryId(name))}
+function centsCanDeliver(name){return centsDeliveryId(name)>0}
 function deliveryCategoryFor(part){
  var c=String((part&&part.category)||'');
  if(c==='Engine upgrades'||c==='Performance'||c==='Nitrous')return 1;
