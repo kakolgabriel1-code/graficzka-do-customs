@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#100917">
-  <title>Hood Stories Customs — Klient</title>
+  <meta name="theme-color" content="#090605">
+  <title>Central CEE Customs — Klient</title>
   <link rel="stylesheet" href="../styles.css">
   <style>
     .client-only main{max-width:1500px}.client-nav{display:flex;gap:8px;margin-left:auto}.client-nav button{border:1px solid #39264a;background:#130d1a;color:#cbbfd4;padding:10px 14px;border-radius:12px;cursor:pointer}.client-nav button.active{color:#fff;border-color:#a85cff;background:#2a173a}
@@ -13,21 +13,44 @@
     .status-wrap{max-width:900px;margin:0 auto}.status-hero{padding:28px;margin-bottom:16px}.status-search{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:18px}.status-result{margin-top:16px}.message-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}.message{padding:12px;border:1px solid #32213f;border-radius:12px;background:#100b15}.message b{display:block;font-size:10px;color:#a992b8}.message span{display:block;margin-top:4px;font-size:12px;line-height:1.5}.status-big{font-size:28px;font-weight:900;color:#dfa8ff}
     @media(max-width:1000px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:650px){.steps{grid-template-columns:1fr}.client-nav{display:none}.status-search{grid-template-columns:1fr}}
   </style>
+  <link rel="stylesheet" href="../central-cee.css?v=1">
 </head>
 <body class="client-only">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
   <header class="topbar">
-    <div class="brand"><img src="../6b126b05-b0e0-42fc-a25c-68007bc75f3a.png" alt="Hood Stories Customs"></div>
+    <div class="cee-brandmark"><div class="cee-crown">♛</div><strong>Central CEE</strong><small>Customs</small></div>
     <div class="client-nav">
-      <button data-client-view="create" class="active">UTWÓRZ ZLECENIE</button>
+      <button data-client-view="create" class="active">KONFIGURATOR</button>
       <button data-client-view="status">STATUS AUTA</button>
     </div>
   </header>
 
   <main>
     <section id="client-create" class="client-view">
+    <section class="cee-client-hero">
+      <div class="cee-hero-copy">
+        <div class="cee-kicker">LUKSUS • PASJA • RZEMIOSŁO</div>
+        <h1>Central CEE<br><span>Customs</span></h1>
+        <p>Twoja wizja. Nasze rzemiosło.</p>
+        <div class="cee-sub">Ekskluzywna personalizacja samochodów w Chicago. Od detalu po pełny projekt — wybierz auto, części, kolor i usługi, a konfigurator policzy cały projekt.</div>
+        <div class="cee-hero-actions">
+          <button class="btn primary" onclick="document.getElementById('vehicle-search').scrollIntoView({behavior:'smooth',block:'center'})">SKONFIGURUJ AUTO</button>
+          <button class="btn ghost" data-client-view="status" onclick="document.querySelector('[data-client-view=status]').click()">STATUS AUTA</button>
+        </div>
+      </div>
+    </section>
+    <div class="cee-category-strip">
+      <div class="cee-category"><span class="ico">◩</span><b>Body Kit</b><small>Nadwozie i aerodynamika</small></div>
+      <div class="cee-category"><span class="ico">◉</span><b>Felgi</b><small>Styl i dopasowanie</small></div>
+      <div class="cee-category"><span class="ico">◍</span><b>Hamulce</b><small>Kontrola i performance</small></div>
+      <div class="cee-category"><span class="ico">↕</span><b>Zawieszenie</b><small>Stance i prowadzenie</small></div>
+      <div class="cee-category"><span class="ico">◫</span><b>Wnętrze</b><small>Fotele, kierownice, detale</small></div>
+      <div class="cee-category"><span class="ico">◆</span><b>Osiągi</b><small>Turbo, dolot, tuning</small></div>
+      <div class="cee-category"><span class="ico">✦</span><b>Lakiernia</b><small>Warianty i wykończenie</small></div>
+      <div class="cee-category"><span class="ico">⌘</span><b>Usługi</b><small>Pełna obsługa warsztatu</small></div>
+    </div>
       <div class="page-head">
-        <div><div class="eyebrow">STRONA KLIENTA</div><h2>Utwórz zlecenie</h2><p>Wybierz swoje auto i dokładnie zaznacz, co chcesz w nim zrobić.</p></div>
+        <div><div class="eyebrow">CENTRAL CEE CUSTOMS • KONFIGURATOR</div><h2>Twój projekt</h2><p>Wybierz swoje auto i dokładnie zaznacz, co chcesz w nim zrobić.</p></div>
       </div>
 
       <div class="steps">
@@ -38,7 +61,7 @@
       </div>
 
       <div class="card" style="padding:18px;margin-bottom:18px">
-        <div class="section-title"><div><span class="section-icon">$</span><h3>Cennik Hood Stories Customs</h3></div><small>klient widzi ceny przed utworzeniem zlecenia</small></div>
+        <div class="section-title"><div><span class="section-icon">$</span><h3>Cennik Central CEE Customs</h3></div><small>klient widzi ceny przed utworzeniem zlecenia</small></div>
         <div id="price-list" class="detail-grid"></div>
         <div class="note" style="margin-top:10px">Cena projektu jest liczona automatycznie z wybranych usług i modyfikacji. Mechanik dostaje 65% końcowej wartości opłaconego zlecenia.</div>
       </div>
@@ -117,7 +140,7 @@
     <section id="client-status" class="client-view hidden">
       <div class="status-wrap">
         <div class="card status-hero">
-          <div class="eyebrow">MOJE AUTO</div>
+          <div class="eyebrow">CENTRAL CEE CUSTOMS • MOJE AUTO</div>
           <h2 style="margin:0 0 8px">Status zlecenia</h2>
           <p class="muted">Wpisz kod śledzenia otrzymany przy tworzeniu zlecenia. Strona pokazuje aktualny status i wiadomości od warsztatu.</p>
           <div class="status-search">
@@ -130,6 +153,7 @@
     </section>
   </main>
 
+  <div class="cee-footer"><div class="cee-brandmark"><div class="cee-crown">♛</div><strong>Central CEE</strong><small>Customs</small></div><span>Chicago • Cars • Customs • Lifestyle</span></div>
   <div id="toast" class="toast"></div>
   <div id="modal" class="modal hidden"><div class="modal-backdrop" data-close-modal></div><div class="modal-card card"><button class="modal-x" data-close-modal>×</button><div id="modal-content"></div></div></div>
 
