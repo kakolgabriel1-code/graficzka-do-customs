@@ -130,7 +130,9 @@ function openOrder(id){
    q('#send-client-message').onclick=function(){var m=q('#client-message').value.trim();if(!m)return;addHistory(o,m);saveOrder(o);q('#client-message').value='';closeModal();openOrder(o.id);toast('Wiadomość zapisana.')};
    q('#save-basic').onclick=function(){saveFields();closeModal();renderAll();toast('Dane zapisane.')};
    if(q('#prepare-bill'))q('#prepare-bill').onclick=function(){
-     var cmd='/trigger hsc_bill set '+Math.round(Number(o.priceTotal)||0);
+     var amount=Math.round(Number(o.priceTotal)||0);
+     if(amount<50||amount>60000||amount%50!==0)return toast('Kwota rachunku musi być 50–60 000$ i wielokrotnością 50$.');
+     var cmd='/trigger hsc_bill set '+amount;
      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cmd).then(function(){toast('Rachunek skopiowany. Wklej komendę w Minecraft.');}).catch(function(){window.prompt('Skopiuj komendę i wklej ją w Minecraft:',cmd);});}
      else window.prompt('Skopiuj komendę i wklej ją w Minecraft:',cmd);
    };
