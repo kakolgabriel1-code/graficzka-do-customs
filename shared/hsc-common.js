@@ -102,7 +102,7 @@ function restoreCompact(x){
     mechanicCut:priced.mechanicCut||0,
     workshopCut:priced.workshopCut||0,
     note:x.n||'',
-    history:[{at:new Date().toISOString(),text:'Projekt klienta zaimportowany do Central CEE Customs.'}]
+    history:[{at:new Date().toISOString(),text:'Projekt klienta zaimportowany do Cent\'s Detailing&Customs.'}]
   }
 }
 function projectCode(p){
