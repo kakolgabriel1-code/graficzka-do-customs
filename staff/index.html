@@ -15,7 +15,7 @@
     .panel-view.hidden{display:none}.import-box{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}.import-box textarea{min-height:86px}.setup-badge{display:inline-flex;padding:6px 9px;border-radius:999px;border:1px solid #52356a;color:#d5abf3;background:#241531;font-size:10px}
     @media(max-width:850px){.project-row{grid-template-columns:1fr 1fr}.import-box{grid-template-columns:1fr}}
   </style>
-  <link rel="stylesheet" href="../central-cee.css?v=3">
+  <link rel="stylesheet" href="../central-cee.css?v=4">
 </head>
 <body class="staff-only">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
@@ -37,6 +37,7 @@
     <header class="topbar">
       <div class="cee-brandmark"><div class="cee-crown">♛</div><strong>Central CEE</strong><small>Customs</small></div>
       <div class="staff-label">STAFF • VERIFIED</div>
+      <button id="staff-reset-test" class="btn ghost" style="padding:9px 12px">RESET TESTU</button>
       <button id="logout" class="btn ghost" style="padding:9px 12px">Wyloguj</button>
     </header>
 
@@ -54,38 +55,31 @@
           </div>
         </aside>
         <div class="cee-staff-content">
-      <div class="page-head">
-        <div><div class="eyebrow">CENTRAL CEE CUSTOMS • STAFF</div><h2>Centrum warsztatu</h2><p>Klient tworzy zlecenie na stronie. Ty importujesz kod, sprawdzasz auto i prowadzisz zlecenie krok po kroku.</p></div>
-        <span class="setup-badge">1 = przyjęcie • 2–8 = uniwersalne • lakiernia osobno</span>
-      </div>
-
-      <div class="card cee-staff-banner">
+      <div class="cee-staff-compact-head">
         <div>
-          <div class="eyebrow">CENTRAL CEE CUSTOMS • OPERATIONS</div>
-          <h3>Panel mechanika</h3>
-          <p>Jedno miejsce do obsługi projektu klienta, stanowiska, części, wiadomości i finalizacji zlecenia. Klient widzi luksusowy konfigurator — tutaj prowadzisz całą robotę od przyjęcia do wydania auta.</p>
+          <div class="eyebrow">CENTRAL CEE • STAFF OS</div>
+          <h2>Warsztat</h2>
         </div>
         <div class="cee-staff-metrics">
-          <div class="cee-metric"><b id="metric-projects">0</b><span>projekty oczekujące</span></div>
-          <div class="cee-metric"><b id="metric-orders">0</b><span>aktywne zlecenia</span></div>
-          <div class="cee-metric"><b id="metric-bays">0 / 7</b><span>zajęte stanowiska 2–8</span></div>
-          <div class="cee-metric"><b id="metric-parts">0</b><span>aktywne dostawy</span></div>
+          <div class="cee-metric"><b id="metric-projects">0</b><span>projekty</span></div>
+          <div class="cee-metric"><b id="metric-orders">0</b><span>aktywne</span></div>
+          <div class="cee-metric"><b id="metric-bays">0 / 7</b><span>stanowiska</span></div>
+          <div class="cee-metric"><b id="metric-parts">0</b><span>dostawy</span></div>
         </div>
       </div>
 
-      <div id="staff-now" class="cee-next-step cee-staff-now"><span class="rp-label">CO ROBISZ TERAZ</span><b>Czekasz na kod projektu od klienta.</b> Klient wysyła go przez aplikację (Discord) albo czat w mieście.</div>
+      <div id="staff-now" class="cee-next-step cee-staff-now"><b>Czekasz na kod projektu klienta.</b></div>
 
-      <div class="cee-staff-guide card">
-        <div class="cee-guide-head"><div><div class="eyebrow">CENTRAL CEE • WORKFLOW</div><h3>Co robisz po kolei</h3></div><span>Nie przeskakuj etapów</span></div>
-        <div class="cee-guide-grid">
-          <div><b>1. ODBIERZ KOD</b><p>Klient wysyła kod projektu przez <strong>aplikację (Discord)</strong> albo czat. Wklej go w „Projekty klientów”.</p></div>
-          <div><b>2. PRZYJMIJ PROJEKT</b><p>Sprawdź auto, części, kolory i cenę. Kliknij „Przyjmij zlecenie”. Klient ma nadal czekać przy recepcji.</p></div>
-          <div><b>3. WEZWIJ AUTO</b><p>W grze otwórz terminal i wybierz „Wezwij klienta na stanowisko 1”. Dopiero wtedy klient podjeżdża autem.</p></div>
-          <div><b>4. HALA 2–8</b><p>Po oględzinach terminalem przydziel wolne stanowisko. Na stronie wybierz ten sam numer i rozpocznij pracę.</p></div>
-          <div><b>5. CZĘŚCI</b><p>Jeśli czegoś brakuje, przejdź do „Części / dostawy”. Zamówienie zawsze przypisz do konkretnego zlecenia.</p></div>
-          <div><b>6. ODBIÓR</b><p>Gdy skończysz, ustaw „Auto gotowe”. Po faktycznym rozliczeniu z klientem oznacz wydanie auta.</p></div>
+      <details class="cee-staff-help">
+        <summary>Jak działa cały system?</summary>
+        <div class="cee-help-steps">
+          <span><b>1.</b> Import kodu</span>
+          <span><b>2.</b> Przyjmij projekt</span>
+          <span><b>3.</b> Terminal → stanowisko 1</span>
+          <span><b>4.</b> Stanowisko 2–8 → praca</span>
+          <span><b>5.</b> Auto gotowe → płatność → wydanie</span>
         </div>
-      </div>
+      </details>
 
       <div class="staff-tabs cee-top-tabs">
         <button data-tab="projects" class="active">Projekty klientów</button>
@@ -96,7 +90,7 @@
 
       <section id="tab-projects" class="panel-view">
         <div class="card" style="padding:18px;margin-bottom:16px">
-          <div class="section-title"><div><span class="section-icon">⇲</span><h3>Import projektu</h3></div><small>kod otrzymany od klienta przez aplikację (Discord) / czat</small></div>
+          <div class="section-title"><div><span class="section-icon">⇲</span><h3>Import projektu</h3></div><small>wklej kod od klienta</small></div>
           <div class="import-box">
             <textarea id="project-code" class="input" placeholder="Wklej tutaj cały kod projektu wysłany przez klienta..."></textarea>
             <button id="import-project" class="btn primary">Importuj</button>
@@ -126,7 +120,7 @@
       <section id="tab-parts" class="panel-view hidden">
         <div class="staff-columns">
           <div class="card" style="padding:18px">
-            <div class="section-title"><div><span class="section-icon">▤</span><h3>Nowe zamówienie części</h3></div><small>strona + fizyczna dostawa datapacka</small></div>
+            <div class="section-title"><div><span class="section-icon">▤</span><h3>Nowe zamówienie części</h3></div><small>zamów część do aktywnego zlecenia</small></div>
             <label class="field-label">ZLECENIE</label>
             <select id="parts-order-id" class="input"></select>
             <label class="field-label" style="margin-top:12px">KATEGORIA DOSTAWY</label>
@@ -136,7 +130,7 @@
             <label class="field-label" style="margin-top:12px">ILOŚĆ</label>
             <input id="parts-qty" class="input" type="number" min="1" max="64" value="1">
             <button id="parts-create" class="btn primary wide" style="margin-top:14px">ZAPISZ ZAMÓWIENIE</button>
-            <div class="note"><b>Jak to działa w RP:</b> wybierz zlecenie → wpisz dokładną część → zapisz zamówienie → kliknij „Akcja” i uruchom dostawę w mieście. Klient zobaczy informację, że część jest w drodze.</div>
+            <div class="cee-rp-mini">Wybierz zlecenie, wpisz część i zapisz. Potem kliknij <b>Akcja</b>.</div>
           </div>
           <div class="card" style="padding:18px">
             <div class="section-title"><div><span class="section-icon">↧</span><h3>Aktywne dostawy</h3></div><small id="parts-count">0</small></div>
@@ -165,6 +159,6 @@
   <script src="../shared/part-rules.js?v=2"></script>
   <script src="../shared/backend-config.js?v=1"></script>
   <script src="../shared/backend.js?v=1"></script>
-  <script src="staff.js?v=12"></script>
+  <script src="staff.js?v=13"></script>
 </body>
 </html>
