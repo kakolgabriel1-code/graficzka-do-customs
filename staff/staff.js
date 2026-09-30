@@ -21,6 +21,25 @@ q('#auth-submit').onclick=auth;q('#staff-pin').addEventListener('keydown',functi
 
 function setTab(name){qa('[data-tab]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===name)});qa('.panel-view').forEach(function(p){p.classList.add('hidden')});q('#tab-'+name).classList.remove('hidden');if(name==='projects')renderProjects();if(name==='orders')renderOrders();if(name==='bays')renderBays();if(name==='parts')renderPartsOrders()}
 qa('[data-tab]').forEach(function(b){b.onclick=function(){setTab(b.getAttribute('data-tab'))}});
+function renderStaffNow(){
+ var box=q('#staff-now');if(!box)return;
+ var projects=activeProjects();
+ var orders=C.listOrders().filter(function(o){return o.status!=='WYDANE'});
+ var ready=orders.find(function(o){return o.status==='GOTOWE DO ODBIORU'});
+ var intake=orders.find(function(o){return o.status==='PRZYJĘCIE'});
+ var work=orders.find(function(o){return o.status==='W TRAKCIE'});
+ if(projects.length){
+  box.innerHTML='<span class="rp-label">CO ROBISZ TERAZ</span><b>Masz projekt do przyjęcia.</b> Wejdź w „Projekty klientów”, otwórz projekt i sprawdź go z klientem. Po przyjęciu wróć do terminala w mieście.'
+ }else if(intake){
+  box.innerHTML='<span class="rp-label">CO ROBISZ TERAZ</span><b>'+C.esc(intake.client)+' czeka na przyjęcie auta.</b> W grze: terminal → „Wezwij klienta na stanowisko 1”, obejrzyj auto i przydziel stanowisko 2–8.'
+ }else if(work){
+  box.innerHTML='<span class="rp-label">CO ROBISZ TERAZ</span><b>Masz auto w trakcie pracy.</b> Wykonuj zakres zlecenia '+C.esc(work.id)+'. Jeśli brakuje części, użyj „Części / dostawy”.'
+ }else if(ready){
+  box.innerHTML='<span class="rp-label">CO ROBISZ TERAZ</span><b>Auto czeka na odbiór.</b> Klient ma wrócić do recepcji. Po faktycznej płatności na serwerze oznacz wydanie auta.'
+ }else{
+  box.innerHTML='<span class="rp-label">CO ROBISZ TERAZ</span><b>Czekasz na kod projektu od klienta.</b> Klient wysyła go przez aplikację (Discord) albo czat w mieście.'
+ }
+}
 function renderMetrics(){
  var projects=activeProjects().length;
  var orders=C.listOrders().filter(function(o){return o.status!=='WYDANE'}).length;
@@ -31,7 +50,7 @@ function renderMetrics(){
  if(q('#metric-bays'))q('#metric-bays').textContent=occupied+' / 7';
  if(q('#metric-parts'))q('#metric-parts').textContent=deliveries
 }
-function renderAll(){renderProjects();renderOrders();renderBays();renderPartsOrders();renderMetrics()}
+function renderAll(){renderProjects();renderOrders();renderBays();renderPartsOrders();renderMetrics();renderStaffNow()}
 
 function activeProjects(){return C.listProjects().filter(function(p){return !p.convertedOrderId})}
 function renderProjects(){
