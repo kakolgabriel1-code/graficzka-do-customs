@@ -141,20 +141,117 @@ function renderBays(){
  q('#bay-grid').innerHTML=b.map(function(x){var o=x.order;return '<div class="bay '+(x.type||'')+'"><div class="bay-num">'+(x.n==='P'?'STREFA SPECJALNA':'STANOWISKO '+x.n)+'</div><h4>'+x.title+'</h4><div class="bay-status">'+(o?C.esc(o.status):'WOLNE')+'</div>'+(o?'<div class="bay-car">'+C.esc(o.vehicle.name)+'<br><span class="muted">'+C.esc(C.formatReg(o.registration))+' • '+C.esc(o.id)+'</span></div>':'')+'</div>'}).join('')
 }
 
-function getPartsOrders(){try{return JSON.parse(localStorage.getItem(PARTS_KEY)||'[]')}catch(e){return[]}}function savePartsOrders(a){localStorage.setItem(PARTS_KEY,JSON.stringify(a))}
-function renderPartsOrders(){
- var os=q('#parts-order-id'),cs=q('#parts-category');if(!os||!cs)return;var orders=C.listOrders().filter(function(o){return o.status==='W TRAKCIE'||o.status==='PRZYJĘCIE'});
- os.innerHTML='<option value="">Wybierz zlecenie...</option>'+orders.map(function(o){return '<option value="'+C.esc(o.id)+'">'+C.esc(o.id+' — '+o.vehicle.name+' — '+C.formatReg(o.registration))+'</option>'}).join('');
- cs.innerHTML=partCats.map(function(x){return '<option value="'+x.id+'">'+x.id+'. '+C.esc(x.name)+'</option>'}).join('');
- var a=getPartsOrders();q('#parts-count').textContent=a.length+' zapisanych';q('#parts-list').innerHTML=a.length?a.map(function(x,i){return '<div class="order-row" style="grid-template-columns:1.15fr 1.5fr 1fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>Ilość: '+x.qty+'</small></div><div><span class="status-pill">'+C.esc(x.state)+'</span><small>/trigger hsc_part set '+x.category+'</small></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">Akcja</button></div></div>'}).join(''):'<div class="mini-empty">Brak zamówień części.</div>';qa('[data-part-action]').forEach(function(b){b.onclick=function(){openPartsAction(Number(b.getAttribute('data-part-action')))}})
+function getPartsOrders(){try{return JSON.parse(localStorage.getItem(PARTS_KEY)||'[]')}catch(e){return[]}}
+function savePartsOrders(a){localStorage.setItem(PARTS_KEY,JSON.stringify(a))}
+
+function deliveryCategoryFor(part){
+ var c=String((part&&part.category)||'');
+ if(c==='Engine upgrades'||c==='Performance'||c==='Nitrous')return 1;
+ if(c==='Suspension')return 2;
+ if(c==='Brakes')return 3;
+ if(c==='Wheels / Rims'||c==='Tires')return 4;
+ if(c==='Bodykit'||c==='Exterior')return 5;
+ if(c==='Interior')return 6;
+ if(c==='Instruments')return 7;
+ return 8
 }
+function partOrderValue(part,index){
+ return encodeURIComponent(JSON.stringify({i:index,c:part.category||'',n:part.name||'',col:part.color||''}))
+}
+function parsePartOrderValue(v){
+ try{return JSON.parse(decodeURIComponent(v))}catch(e){return null}
+}
+function fillPartsForSelectedOrder(){
+ var oid=q('#parts-order-id').value,sel=q('#parts-name'),hint=q('#parts-auto-category');
+ if(!sel)return;
+ if(!oid){
+  sel.innerHTML='<option value="">Najpierw wybierz zlecenie...</option>';
+  if(hint)hint.textContent='Kategoria dostawy ustawi się automatycznie.';
+  return
+ }
+ var o=C.listOrders().find(function(x){return x.id===oid});
+ var parts=o&&o.parts||[];
+ if(!parts.length){
+  sel.innerHTML='<option value="">To zlecenie nie ma części do zamówienia</option>';
+  if(hint)hint.textContent='Klient nie wybrał żadnej części / modyfikacji.';
+  return
+ }
+ sel.innerHTML='<option value="">Wybierz część...</option>'+parts.map(function(p,i){
+   var label=T.part(p.name||p)+(p.color?' • '+p.color:'');
+   return '<option value="'+partOrderValue(p,i)+'">'+C.esc(label)+'</option>'
+ }).join('');
+ if(hint)hint.textContent='Wybierz dokładnie tę część, którą chcesz sprowadzić.'
+}
+function updatePartCategoryHint(){
+ var v=q('#parts-name').value,hint=q('#parts-auto-category');if(!hint)return;
+ var p=parsePartOrderValue(v);
+ if(!p){hint.textContent='Kategoria dostawy ustawi się automatycznie.';return}
+ var id=deliveryCategoryFor({category:p.c,name:p.n}),cc=partCats.find(function(x){return x.id===id});
+ hint.innerHTML='Dostawa: <b>'+C.esc(cc?cc.name:'Pozostałe części')+'</b> • 1 zestaw'
+}
+function renderPartsOrders(){
+ var os=q('#parts-order-id');if(!os)return;
+ var previous=os.value;
+ var orders=C.listOrders().filter(function(o){return o.status==='W TRAKCIE'||o.status==='PRZYJĘCIE'});
+ os.innerHTML='<option value="">Wybierz zlecenie...</option>'+orders.map(function(o){return '<option value="'+C.esc(o.id)+'">'+C.esc(o.id+' — '+o.vehicle.name+' — '+C.formatReg(o.registration))+'</option>'}).join('');
+ if(previous&&orders.some(function(o){return o.id===previous}))os.value=previous;
+ fillPartsForSelectedOrder();
+ var all=getPartsOrders(),active=all.filter(function(x){return x.state!=='ODEBRANE'&&x.state!=='ANULOWANE'});
+ q('#parts-count').textContent=active.length+' aktywnych';
+ q('#parts-list').innerHTML=active.length?active.map(function(x){
+   var i=all.indexOf(x);
+   var state=x.state==='W DRODZE'?'W DRODZE':'DO URUCHOMIENIA';
+   return '<div class="order-row" style="grid-template-columns:1.15fr 1.7fr .8fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>1 zestaw'+(x.color?' • '+C.esc(x.color):'')+'</small></div><div><span class="status-pill">'+C.esc(state)+'</span></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">OBSŁUŻ DOSTAWĘ</button></div></div>'
+ }).join(''):'<div class="mini-empty">Brak aktywnych dostaw.</div>';
+ qa('[data-part-action]').forEach(function(b){b.onclick=function(){openPartsAction(Number(b.getAttribute('data-part-action')))}})
+}
+q('#parts-order-id').onchange=function(){fillPartsForSelectedOrder();updatePartCategoryHint()};
+q('#parts-name').onchange=updatePartCategoryHint;
+
 function openPartsAction(i){
- var a=getPartsOrders(),x=a[i];if(!x)return;var cmd='/trigger hsc_part set '+x.category;
- modal('<div class="eyebrow">DOSTAWA CZĘŚCI</div><h2 style="margin-top:0">'+C.esc(x.name)+'</h2><div class="detail-grid"><div class="detail-box"><span>Zlecenie</span><b>'+C.esc(x.orderId)+'</b></div><div class="detail-box"><span>Kategoria</span><b>'+C.esc(x.categoryName)+'</b></div></div><div class="cee-next-step" style="margin-top:14px"><b>Uruchom komendę w grze, żeby rozpocząć dostawę.</b></div><label class="field-label" style="margin-top:15px">KOMENDA W MIEŚCIE</label><input id="parts-command" class="input" readonly value="'+C.esc(cmd)+'"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button id="copy-parts-command" class="btn ghost">KOPIUJ KOMENDĘ</button><button id="mark-parts-sent" class="btn primary">DOSTAWA URUCHOMIONA</button></div><button id="remove-parts-order" class="btn danger wide" style="margin-top:8px">Usuń wpis</button>');
- setTimeout(function(){q('#copy-parts-command').onclick=function(){var t=q('#parts-command');t.select();document.execCommand('copy');toast('Skopiowano komendę.')};q('#mark-parts-sent').onclick=function(){x.state='W DRODZE';savePartsOrders(a);var o=C.listOrders().find(function(z){return z.id===x.orderId});if(o){addHistory(o,'Central CEE zamówiło część: '+x.name+'. Dostawa jest w drodze. Na razie nie musisz nic robić.');saveOrder(o)}closeModal();renderAll();toast('Dostawa uruchomiona.')};q('#remove-parts-order').onclick=function(){a.splice(i,1);savePartsOrders(a);closeModal();renderPartsOrders()}},0)
+ var a=getPartsOrders(),x=a[i];if(!x)return;
+ var cmd='/trigger hsc_part set '+x.category;
+ if(x.state==='W DRODZE'){
+  modal('<div class="eyebrow">DOSTAWA W DRODZE</div><h2 style="margin-top:0">'+C.esc(x.name)+'</h2><div class="cee-next-step"><b>Teraz nic nie wpisujesz na stronie.</b><br>Poczekaj, aż Minecraft poinformuje, że dostawa dotarła. W terminalu pracownika odbierz paczkę, a potem wróć tutaj i oznacz ją jako odebraną.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button id="parts-received" class="btn primary">PACZKA ODEBRANA</button><button id="parts-close" class="btn ghost">ZAMKNIJ</button></div>');
+  setTimeout(function(){
+   q('#parts-received').onclick=function(){x.state='ODEBRANE';savePartsOrders(a);closeModal();renderAll();toast('Dostawa zakończona.')};
+   q('#parts-close').onclick=closeModal
+  },0);
+  return
+ }
+ modal('<div class="eyebrow">DOSTAWA CZĘŚCI</div><h2 style="margin-top:0">'+C.esc(x.name)+'</h2>'+
+ '<div class="cee-next-step"><b>1.</b> Kliknij <b>KOPIUJ KOMENDĘ</b>.<br><b>2.</b> Wklej ją na czacie Minecraft i naciśnij Enter.<br><b>3.</b> Dopiero potem wróć tutaj i kliknij <b>WPISAŁEM KOMENDĘ W GRZE</b>.</div>'+
+ '<label class="field-label" style="margin-top:15px">KOMENDA</label><input id="parts-command" class="input" readonly value="'+C.esc(cmd)+'">'+
+ '<button id="copy-parts-command" class="btn primary wide" style="margin-top:10px">1. KOPIUJ KOMENDĘ</button>'+
+ '<button id="mark-parts-sent" class="btn ghost wide" style="margin-top:8px">2. WPISAŁEM KOMENDĘ W GRZE</button>'+
+ '<button id="remove-parts-order" class="btn danger wide" style="margin-top:8px">ANULUJ ZAMÓWIENIE</button>');
+ setTimeout(function(){
+  q('#copy-parts-command').onclick=function(){
+   var t=q('#parts-command');t.select();
+   try{document.execCommand('copy');toast('Skopiowano. Teraz wklej komendę w Minecraft.')}catch(e){toast('Zaznacz komendę i skopiuj ręcznie.')}
+  };
+  q('#mark-parts-sent').onclick=function(){
+   x.state='W DRODZE';savePartsOrders(a);
+   var o=C.listOrders().find(function(z){return z.id===x.orderId});
+   if(o){addHistory(o,'Część „'+x.name+'” została zamówiona. Dostawa jest w drodze.');saveOrder(o)}
+   closeModal();renderAll();toast('Okej — dostawa jest teraz oznaczona jako W DRODZE.')
+  };
+  q('#remove-parts-order').onclick=function(){x.state='ANULOWANE';savePartsOrders(a);closeModal();renderPartsOrders();toast('Zamówienie anulowane.')}
+ },0)
 }
 q('#parts-create').onclick=function(){
- var oid=q('#parts-order-id').value,name=q('#parts-name').value.trim(),cat=Number(q('#parts-category').value),qty=Math.max(1,Number(q('#parts-qty').value)||1);if(!oid)return toast('Wybierz zlecenie.');if(!name)return toast('Wpisz nazwę części.');var cc=partCats.find(function(x){return x.id===cat}),a=getPartsOrders();a.unshift({id:'PART-'+Date.now(),orderId:oid,category:cat,categoryName:cc.name,name:name,qty:qty,state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});savePartsOrders(a);q('#parts-name').value='';q('#parts-qty').value='1';renderPartsOrders();toast('Zamówienie zapisane. Kliknij Akcja i uruchom dostawę w grze.')};
+ var oid=q('#parts-order-id').value,val=q('#parts-name').value;
+ if(!oid)return toast('Najpierw wybierz zlecenie.');
+ var picked=parsePartOrderValue(val);if(!picked)return toast('Wybierz część z listy.');
+ var o=C.listOrders().find(function(x){return x.id===oid});if(!o)return toast('Nie znaleziono zlecenia.');
+ var part=(o.parts||[])[Number(picked.i)];if(!part)return toast('Ta część nie jest już w zleceniu.');
+ var cat=deliveryCategoryFor(part),cc=partCats.find(function(x){return x.id===cat});
+ var name=T.part(part.name||part),color=part.color||'';
+ var a=getPartsOrders();
+ if(a.some(function(x){return x.orderId===oid&&x.name===name&&x.color===color&&x.state!=='ODEBRANE'&&x.state!=='ANULOWANE'}))return toast('Ta część ma już aktywną dostawę.');
+ a.unshift({id:'PART-'+Date.now(),orderId:oid,category:cat,categoryName:cc?cc.name:'Pozostałe części',name:name,color:color,qty:1,state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});
+ savePartsOrders(a);q('#parts-name').value='';updatePartCategoryHint();renderPartsOrders();toast('Dodano do dostawy. Teraz kliknij OBSŁUŻ DOSTAWĘ.')
+};
 
 if(sessionStorage.getItem(SESSION)==='1'&&C.ownerPinExists())showApp();else showAuth();
 })();
