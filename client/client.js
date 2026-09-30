@@ -4,12 +4,12 @@ var C=window.HSCCommon,T=window.HSCI18N,B=window.HSCBackend,P=window.HSCPricing,
 DATA.parts=DATA.parts||[];
 var state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};
 var services=[
- {id:'diagnostyka',name:'Diagnostyka pełna',desc:'Sprawdzenie auta i części po przyjęciu.'},
- {id:'kola',name:'Serwis kół / felg',desc:'Montaż i ustawienie zgodnie z możliwościami moda.'},
- {id:'zawieszenie',name:'Serwis zawieszenia',desc:'Obsługa dostępnych elementów zawieszenia.'},
- {id:'hamulce',name:'Serwis hamulców',desc:'Kontrola i kompatybilne części.'},
- {id:'lakiernia',name:'Lakiernia',desc:'Zmiana wariantu lakieru, jeśli auto ją obsługuje.'},
- {id:'detailing',name:'Detailing / przygotowanie',desc:'Końcowe przygotowanie auta.'}
+ {id:'diagnostyka',name:'Diagnostyka pełna',desc:'Skan auta, kontrola podzespołów i raport mechanika.'},
+ {id:'kola',name:'Serwis kół / felg',desc:'Kontrola, demontaż i montaż wybranego zestawu.'},
+ {id:'zawieszenie',name:'Serwis zawieszenia',desc:'Kontrola i obsługa dostępnych elementów zawieszenia.'},
+ {id:'hamulce',name:'Serwis hamulców',desc:'Kontrola hamulców i montaż kompatybilnego zestawu.'},
+ {id:'lakiernia',name:'Lakiernia',desc:'Zmiana wariantu lakieru w osobnej strefie lakierniczej.'},
+ {id:'detailing',name:'Detailing / przygotowanie',desc:'Końcowa kontrola i przygotowanie auta do wydania.'}
 ];
 var icons={'Bodykit':'◩','Interior':'◫','Wheels / Rims':'◉','Engine upgrades':'⚙','Exterior':'⌁','Suspension':'↕','Brakes':'◍','Tires':'◎','Performance':'◆','Instruments':'◌','Nitrous':'N₂O'};
 var colors={white:'#eee',black:'#151515',blue:'#3d73ff',red:'#e84c5a',green:'#44b875',yellow:'#ffd65d',gray:'#8f9098',grey:'#8f9098',silver:'#c7c9d2',orange:'#ff934c',purple:'#a65cff','pearl white':'#f9f5ff',aurora:'#cc75ff',custom:'#c680ff','custom 1':'#cc79ff','custom 2':'#78d5ff',base:'#aaa',eggs:'#f5dda3',police:'#4672ff'};
@@ -38,7 +38,7 @@ function renderConfig(){var v=state.vehicle;if(!v){q('#vehicle-empty').classList
   if(state.services.indexOf('lakiernia')<0)state.services.push('lakiernia');
   renderConfig();
   renderSummary();
-  toast('Lakiernia została dodana automatycznie do zlecenia.')
+  toast('Lakiernia została dopisana do projektu, bo zmieniasz kolor auta.')
 }});
  renderTabs();renderParts();renderServices()}
 function vehicleParts(){if(!state.vehicle)return[];return DATA.parts.filter(function(p){return (p.cars||[]).indexOf(state.vehicle.id)>=0})}
@@ -126,7 +126,7 @@ function renderServices(){
    var id=el.getAttribute('data-s');
    if(id==='lakiernia'&&state.paint){
     if(state.services.indexOf('lakiernia')<0)state.services.push('lakiernia');
-    toast('Nie można wyłączyć lakierni, gdy wybrany jest nowy lakier.');
+    toast('Najpierw wróć do fabrycznego lakieru — wtedy możesz usunąć usługę lakierni.');
     renderServices();renderSummary();return
    }
    var i=state.services.indexOf(id);
@@ -169,12 +169,30 @@ async function saveProject(){
    if(opts.length&&!state.partColors[ck])return toast('Wybierz kolor / wariant dla: '+T.part(cname));
  }
  var reg=C.makeChicagoReg(digits),tracking=C.trackingCode();
- var priced=P?P.calculate(state.parts,state.services):{total:0,mechanicCut:0,workshopCut:0};var project={id:C.projectId(),trackingCode:tracking,createdAt:new Date().toISOString(),status:'PROJEKT KLIENTA',client:client,registration:reg,vehicle:{id:state.vehicle.id,name:state.vehicle.name,pack:state.vehicle.pack,itemId:state.vehicle.itemId},paint:state.paint,parts:state.parts.map(function(k){var a=k.split('|'),cat=a.shift(),name=a.join('|');return{category:cat,name:name,color:state.partColors[k]||null}}),services:state.services.map(function(id){var s=services.find(function(x){return x.id===id});return s?s.name:id}),priceTotal:priced.total,mechanicCut:priced.mechanicCut,workshopCut:priced.workshopCut,note:q('#client-note').value.trim(),history:[{at:new Date().toISOString(),text:'Zlecenie przygotowane przez klienta. Podejdź do recepcji Central CEE Customs.'}]};
+ var priced=P?P.calculate(state.parts,state.services):{total:0,mechanicCut:0,workshopCut:0};var project={id:C.projectId(),trackingCode:tracking,createdAt:new Date().toISOString(),status:'PROJEKT KLIENTA',client:client,registration:reg,vehicle:{id:state.vehicle.id,name:state.vehicle.name,pack:state.vehicle.pack,itemId:state.vehicle.itemId},paint:state.paint,parts:state.parts.map(function(k){var a=k.split('|'),cat=a.shift(),name=a.join('|');return{category:cat,name:name,color:state.partColors[k]||null}}),services:state.services.map(function(id){var s=services.find(function(x){return x.id===id});return s?s.name:id}),priceTotal:priced.total,mechanicCut:priced.mechanicCut,workshopCut:priced.workshopCut,note:q('#client-note').value.trim(),history:[{at:new Date().toISOString(),text:'Projekt został przygotowany online. Wyślij kod mechanikowi przez aplikację (Discord) albo czat, a potem zgłoś się przy recepcji Central CEE Customs.'}]};
  C.saveProject(project);
  try{if(B)await B.submitProject(project)}catch(e){console.warn(e)}
  var code=C.projectCode(project);
- modal('<div class="eyebrow">ZLECENIE UTWORZONE</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="note" style="font-size:13px;line-height:1.7"><b>CO ROBISZ TERAZ:</b><br>1. Kliknij <b>KOPIUJ KOD DLA MECHANIKA</b>.<br>2. Wyślij cały kod mechanikowi na czacie Minecraft albo Discordzie.<br>3. Podejdź do <b>RECEPCJI Central CEE Customs</b>.<br>4. U recepcjonisty kliknij <b>MAM GOTOWE ZLECENIE</b>.<br>5. Zostań przy recepcji. Mechanik powie ci, kiedy masz podjechać autem na stanowisko 1.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):String(project.priceTotal)+' $')+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA</label><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD DLA MECHANIKA</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
+ modal('<div class="eyebrow">CENTRAL CEE • PROJEKT GOTOWY</div><h2 style="margin:0 0 10px">'+C.esc(project.id)+'</h2><div class="cee-next-step"><span class="rp-label">CO TERAZ ROBISZ W RP</span><b>1.</b> Skopiuj kod dla mechanika.<br><b>2.</b> Wyślij go mechanikowi przez <span class="cee-app-chip">aplikację (Discord)</span> albo czat w mieście.<br><b>3.</b> Podejdź do recepcji Central CEE Customs i zgłoś, że projekt jest gotowy.<br><b>4.</b> Zostań przy recepcji. <b>Nie jedź na halę</b>, dopóki warsztat nie wyśle ci wezwania na stanowisko 1.</div><div class="detail-grid" style="margin-top:14px"><div class="detail-box"><span>Auto</span><b>'+C.esc(project.vehicle.name)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(project.registration))+'</b></div><div class="detail-box"><span>Kod śledzenia</span><b>'+C.esc(tracking)+'</b></div><div class="detail-box"><span>Do zapłaty po wykonaniu</span><b>'+(P?P.money(project.priceTotal):String(project.priceTotal)+' $')+'</b></div></div><label class="field-label" style="margin-top:16px">KOD DLA MECHANIKA</label><textarea id="project-code" class="input project-code" readonly>'+C.esc(code)+'</textarea><button id="copy-project" class="btn primary wide" style="margin-top:10px">KOPIUJ KOD I WYŚLIJ PRZEZ APLIKACJĘ</button><button id="copy-track" class="btn ghost wide" style="margin-top:8px">KOPIUJ KOD ŚLEDZENIA</button>');
  setTimeout(function(){q('#copy-project').onclick=function(){copy(code)};q('#copy-track').onclick=function(){copy(tracking)}},0)
+}
+
+function clientGuide(status,bay,payment){
+ var s=String(status||'').toUpperCase();
+ if(s==='CZEKA NA PRZYJĘCIE'||s==='PROJEKT KLIENTA'||s==='PRZYJĘCIE'){
+   return '<div class="cee-next-step"><span class="rp-label">CO TERAZ</span><b>Zostań przy recepcji.</b> Projekt jest u warsztatu. Nie wjeżdżaj na halę, dopóki mechanik nie wezwie cię na stanowisko 1.</div>'
+ }
+ if(s==='W TRAKCIE'){
+   var place=bay&&bay!=='—'?' na stanowisku '+C.esc(bay):' w warsztacie';
+   return '<div class="cee-next-step"><span class="rp-label">CO TERAZ</span>Auto jest'+place+'. <b>Nie musisz nic robić.</b> Czekaj na wiadomość z warsztatu przez stronę, czat lub aplikację (Discord).</div>'
+ }
+ if(s==='GOTOWE DO ODBIORU'){
+   return '<div class="cee-next-step"><span class="rp-label">CO TERAZ</span><b>Wróć do Central CEE Customs po odbiór.</b> Podejdź do recepcji i poczekaj na rozliczenie oraz wydanie auta.</div>'
+ }
+ if(s==='WYDANE'){
+   return '<div class="cee-next-step"><span class="rp-label">ZLECENIE ZAKOŃCZONE</span>Auto zostało wydane. Nie masz już żadnych czynności do wykonania.</div>'
+ }
+ return '<div class="cee-next-step"><span class="rp-label">CO TERAZ</span>Sprawdź ostatnią wiadomość z warsztatu. Jeśli nie ma nowej instrukcji, poczekaj na kontakt mechanika.</div>'
 }
 
 async function checkStatus(){
@@ -184,8 +202,8 @@ async function checkStatus(){
    var o=B?await B.publicStatus(code):null;
    if(!o){q('#status-result').innerHTML='<div class="note">Nie znaleziono zlecenia. Jeżeli mechanik jeszcze nie utworzył oficjalnego zlecenia, poczekaj przy recepcji.</div>';return}
    var status=o.status||'PRZYJĘCIE',bay=o.bay||'—',hist=o.history||[];
-   q('#status-result').innerHTML='<div class="card" style="padding:18px"><div class="status-big">'+C.esc(status)+'</div><div class="detail-grid" style="margin-top:12px"><div class="detail-box"><span>Auto</span><b>'+C.esc((o.vehicle&&o.vehicle.name)||'—')+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(o.registration))+'</b></div><div class="detail-box"><span>Stanowisko</span><b>'+C.esc(bay)+'</b></div><div class="detail-box"><span>Płatność</span><b>'+C.esc(o.paymentStatus||'NIEOPŁACONE')+'</b></div></div><h3 style="margin-bottom:8px">Wiadomości z warsztatu</h3><div class="message-list">'+(hist.length?hist.slice().reverse().map(function(m){return '<div class="message"><b>'+new Date(m.at).toLocaleString('pl-PL')+'</b><span>'+C.esc(m.text)+'</span></div>'}).join(''):'<div class="mini-empty">Brak wiadomości.</div>')+'</div></div>';
- }catch(e){q('#status-result').innerHTML='<div class="note">Nie udało się pobrać statusu. Status online między dwoma komputerami wymaga podłączonej wspólnej bazy HSC.</div>'}
+   q('#status-result').innerHTML='<div class="card" style="padding:18px"><div class="status-big">'+C.esc(status)+'</div>'+clientGuide(status,bay,o.paymentStatus)+'<div class="detail-grid" style="margin-top:12px"><div class="detail-box"><span>Auto</span><b>'+C.esc((o.vehicle&&o.vehicle.name)||'—')+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(o.registration))+'</b></div><div class="detail-box"><span>Stanowisko</span><b>'+C.esc(bay)+'</b></div><div class="detail-box"><span>Płatność</span><b>'+C.esc(o.paymentStatus||'NIEOPŁACONE')+'</b></div></div><h3 style="margin-bottom:8px">Wiadomości z warsztatu</h3><div class="message-list">'+(hist.length?hist.slice().reverse().map(function(m){return '<div class="message"><b>'+new Date(m.at).toLocaleString('pl-PL')+'</b><span>'+C.esc(m.text)+'</span></div>'}).join(''):'<div class="mini-empty">Brak nowych wiadomości. Poczekaj na kontakt warsztatu.</div>')+'</div></div>';
+ }catch(e){q('#status-result').innerHTML='<div class="note">Nie udało się pobrać statusu. Status online między dwoma komputerami wymaga podłączonej wspólnej bazy Central CEE.</div>'}
 }
 q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('keydown',function(e){if(e.key==='Enter')checkStatus()});
 
