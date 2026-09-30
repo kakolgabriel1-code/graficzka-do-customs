@@ -1,4 +1,4 @@
-# Hood Stories Customs — WebDisplays
+# Cent's Detailing&Customs — WebDisplays
 
 System został rozdzielony na dwie osobne strony.
 
@@ -15,7 +15,7 @@ Klient:
 
 Klient nie tworzy oficjalnego zlecenia.
 
-## HSC Staff OS
+## Cent's Staff OS
 `/staff/`
 
 Pracownik:
