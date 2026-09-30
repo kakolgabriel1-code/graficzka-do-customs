@@ -413,3 +413,63 @@ a{color:#e5a47c}
  .cee-wizard-actions{flex-direction:column}
  .cee-staff-compact-head .cee-staff-metrics{grid-template-columns:1fr 1fr}
 }
+
+
+/* ===== Cent's Detailing&Customs v5 BRAND RESET =====
+   Old Central CEE artwork is intentionally hidden so no legacy name appears on the live site. */
+.cee-brandmark{
+  background-image:none!important;
+  width:auto!important;height:auto!important;min-width:230px!important;
+  padding:4px 12px!important;
+}
+.cee-brandmark>*{opacity:1!important;pointer-events:auto!important}
+.cee-brandmark strong{
+  font-size:24px!important;
+  text-transform:none!important;
+  letter-spacing:.025em!important;
+  white-space:nowrap!important;
+}
+.cee-brandmark small{
+  font-size:8px!important;
+  letter-spacing:.24em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+}
+.cee-brandmark.large{width:auto!important;height:auto!important;min-width:310px!important}
+.cee-brandmark.large strong{font-size:36px!important}
+.cee-brandmark.large small{font-size:10px!important}
+.cee-footer .cee-brandmark{width:auto!important;height:auto!important;min-width:220px!important;transform:none!important}
+
+/* Legacy generated graphics contained the previous name, so use a clean rose-gold background instead. */
+.cee-client-hero{
+  background-image:
+    radial-gradient(760px 360px at 78% 50%,rgba(213,138,98,.18),transparent 62%),
+    linear-gradient(110deg,rgba(5,3,2,.99) 0%,rgba(12,7,5,.96) 40%,rgba(37,18,11,.82) 72%,rgba(5,3,2,.96) 100%)!important;
+}
+.cee-client-hero:after{
+  background:
+    radial-gradient(circle at 78% 47%,transparent 0 78px,rgba(240,176,135,.20) 80px 82px,transparent 84px),
+    radial-gradient(circle at 78% 47%,rgba(202,111,65,.10),transparent 185px),
+    linear-gradient(180deg,rgba(255,255,255,.018),transparent 24% 76%,rgba(213,138,98,.05))!important;
+}
+.cee-empty-emblem{
+  background:none!important;width:auto!important;aspect-ratio:auto!important;
+  min-height:110px!important;
+}
+.cee-empty-emblem .cee-brandmark{display:flex!important}
+.cee-staff-sidebar:after{display:none!important}
+
+/* Staff banner no longer reuses legacy artwork. */
+.cee-staff-banner{
+  background-image:
+    radial-gradient(520px 220px at 82% 42%,rgba(194,101,57,.18),transparent 66%),
+    linear-gradient(100deg,rgba(7,4,3,.99),rgba(18,10,7,.92) 55%,rgba(45,22,13,.70))!important;
+}
+
+@media(max-width:760px){
+ .cee-brandmark{min-width:170px!important;padding:2px 6px!important}
+ .cee-brandmark strong{font-size:18px!important}
+ .cee-brandmark small{font-size:6px!important;letter-spacing:.16em!important}
+ .cee-brandmark.large{min-width:250px!important}
+ .cee-brandmark.large strong{font-size:29px!important}
+}
