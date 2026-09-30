@@ -135,6 +135,20 @@ function renderServices(){
   }
  })
 }
+function updateClientGuide(){
+ var box=q('#client-next-step');if(!box)return;
+ var nick=q('#client-name')?q('#client-name').value.trim():'';
+ var reg=q('#client-reg')?q('#client-reg').value.replace(/\D/g,''):'';
+ if(!state.vehicle){
+  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>1. Wybierz samochód.</b> Po lewej znajdź model z książeczki pojazdu.'
+ }else if(!state.parts.length&&!state.services.length&&!state.paint){
+  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>2. Zbuduj projekt.</b> Wybierz lakier, modyfikacje lub usługi. Cena liczy się sama.'
+ }else if(!nick||reg.length!==4){
+  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>3. Uzupełnij dane.</b> Wpisz nick z miasta i 4 cyfry rejestracji Chicago z dokumentów auta.'
+ }else{
+  box.innerHTML='<span class="rp-label">CO TERAZ</span><b>4. Wyślij projekt.</b> Sprawdź podsumowanie i kliknij „Wyślij projekt do Central CEE”. Potem wyślij kod mechanikowi przez aplikację (Discord) albo czat.'
+ }
+}
 function renderSummary(){
  var rows=[];
  if(state.vehicle)rows.push({n:state.vehicle.name,m:state.vehicle.id});
@@ -155,10 +169,11 @@ function renderSummary(){
  q('#build-summary').innerHTML=rows.length?rows.map(function(r){
   return '<div class="summary-item"><div><b>'+C.esc(r.n)+'</b><small>'+C.esc(r.m)+'</small></div></div>'
  }).join(''):'<div class="mini-empty">Jeszcze nic nie wybrano.</div>';
- if(P&&q('#project-total'))q('#project-total').textContent=P.money(P.calculate(state.parts,state.services).total)
+ if(P&&q('#project-total'))q('#project-total').textContent=P.money(P.calculate(state.parts,state.services).total);
+ updateClientGuide()
 }
 function updateReg(){var raw=q('#client-reg').value.replace(/\D/g,'').slice(0,4);q('#client-reg').value=raw;q('#reg-preview').textContent=raw.length?'CHICAGO '+raw.padStart(4,'0'):'CHICAGO ----'}
-q('#client-reg').addEventListener('input',updateReg);
+q('#client-reg').addEventListener('input',function(){updateReg();updateClientGuide()});q('#client-name').addEventListener('input',updateClientGuide);
 
 async function saveProject(){
  if(!state.vehicle)return toast('Najpierw wybierz auto.');
@@ -209,5 +224,5 @@ q('#tracking-check').onclick=checkStatus;q('#tracking-code').addEventListener('k
 
 function clearAll(){state={vehicle:null,paint:null,parts:[],partColors:{},services:[],pack:'all',cat:'all'};q('#vehicle-search').value='';q('#mod-search').value='';q('#client-name').value='';q('#client-reg').value='';q('#client-note').value='';updateReg();renderFilters();renderVehicles();renderConfig();renderSummary()}
 q('#vehicle-search').addEventListener('input',renderVehicles);q('#mod-search').addEventListener('input',renderParts);q('#save-project').onclick=saveProject;q('#clear-build').onclick=clearAll;
-renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();
+renderPriceList();renderFilters();renderVehicles();renderConfig();renderSummary();updateReg();updateClientGuide();
 })();
