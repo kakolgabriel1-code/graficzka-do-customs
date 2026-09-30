@@ -13,7 +13,7 @@
     .status-wrap{max-width:900px;margin:0 auto}.status-hero{padding:28px;margin-bottom:16px}.status-search{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:18px}.status-result{margin-top:16px}.message-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}.message{padding:12px;border:1px solid #32213f;border-radius:12px;background:#100b15}.message b{display:block;font-size:10px;color:#a992b8}.message span{display:block;margin-top:4px;font-size:12px;line-height:1.5}.status-big{font-size:28px;font-weight:900;color:#dfa8ff}
     @media(max-width:1000px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:650px){.steps{grid-template-columns:1fr}.client-nav{display:none}.status-search{grid-template-columns:1fr}}
   </style>
-  <link rel="stylesheet" href="../central-cee.css?v=1">
+  <link rel="stylesheet" href="../central-cee.css?v=3">
 </head>
 <body class="client-only">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
@@ -53,17 +53,25 @@
         <div><div class="eyebrow">CENTRAL CEE CUSTOMS • KONFIGURATOR</div><h2>Twój projekt</h2><p>Wybierz swoje auto i dokładnie zaznacz, co chcesz w nim zrobić.</p></div>
       </div>
 
-      <div class="steps">
-        <div class="step"><b>KROK 1</b><span>Wybierz auto, lakier, części i usługi.</span></div>
-        <div class="step"><b>KROK 2</b><span>Wpisz nick oraz 4 cyfry rejestracji Chicago z papierów pojazdu.</span></div>
-        <div class="step"><b>KROK 3</b><span>Kliknij <strong>UTWÓRZ ZLECENIE</strong> i skopiuj kod projektu.</span></div>
-        <div class="step"><b>KROK 4</b><span>Wyślij kod mechanikowi i podejdź do recepcji. Nie jedź jeszcze na stanowisko 1.</span></div>
+      <div class="cee-rp-intro card">
+        <div>
+          <div class="eyebrow">CONCIERGE • JAK ZAŁATWIĆ AUTO</div>
+          <h3>Nie musisz znać systemu. Zrób tylko te 4 rzeczy.</h3>
+          <p>Resztę prowadzi mechanik i komunikaty z warsztatu.</p>
+        </div>
+        <div class="cee-rp-badge">CENTRAL CEE<br><b>CLIENT FLOW</b></div>
+      </div>
+      <div class="steps cee-rp-steps">
+        <div class="step"><b>01 • ZBUDUJ PROJEKT</b><span>Wybierz auto, lakier, modyfikacje i usługi. Przy częściach wybierz też kolor / wariant, jeśli jest dostępny.</span></div>
+        <div class="step"><b>02 • SPRAWDŹ DOKUMENTY</b><span>Przepisz swój nick i 4 cyfry rejestracji Chicago z książeczki pojazdu.</span></div>
+        <div class="step"><b>03 • WYŚLIJ PROJEKT</b><span>Po utworzeniu zlecenia skopiuj <strong>kod dla mechanika</strong> i wyślij go przez <strong>aplikację (Discord)</strong> albo czat w mieście.</span></div>
+        <div class="step"><b>04 • RECEPCJA</b><span>Podejdź do recepcji Central CEE Customs i zgłoś gotowy projekt. <strong>Nie wjeżdżaj na halę</strong>, dopóki warsztat nie wezwie cię na stanowisko 1.</span></div>
       </div>
 
       <div class="card" style="padding:18px;margin-bottom:18px">
         <div class="section-title"><div><span class="section-icon">$</span><h3>Cennik Central CEE Customs</h3></div><small>klient widzi ceny przed utworzeniem zlecenia</small></div>
         <div id="price-list" class="detail-grid"></div>
-        <div class="note" style="margin-top:10px">Cena projektu jest liczona automatycznie z wybranych usług i modyfikacji. Mechanik dostaje 65% końcowej wartości opłaconego zlecenia.</div>
+        <div class="note cee-concierge-note" style="margin-top:10px"><b>Wycena jest od razu widoczna.</b> Każda zaznaczona usługa i modyfikacja dolicza się automatycznie. Po przyjęciu projektu mechanik widzi ten sam zakres i tę samą kwotę.</div>
       </div>
 
       <div class="client-grid">
@@ -75,10 +83,11 @@
         </aside>
 
         <section class="config-panel">
-          <div id="vehicle-empty" class="card empty-state">
-            <img src="../b189f76c-f467-46fc-b084-aacd37fc85b2.png" alt="">
+          <div id="vehicle-empty" class="card empty-state cee-empty-state">
+            <div class="cee-empty-emblem"><div class="cee-brandmark large"><div class="cee-crown">♛</div><strong>Central CEE</strong><small>Customs</small></div></div>
+            <div class="cee-empty-kicker">PRIVATE CONFIGURATOR</div>
             <h3>Wybierz samochód</h3>
-            <p>Po wyborze zobaczysz tylko rzeczy dostępne dla tego modelu.</p>
+            <p>Po wyborze otworzymy katalog części dostępnych dokładnie dla tego modelu.</p>
           </div>
 
           <div id="vehicle-config" class="hidden">
@@ -120,7 +129,8 @@
             <div class="note">Wpisz tylko 4 cyfry z papierów pojazdu. Wszystkie auta w systemie mają teraz wyłącznie rejestracje Chicago.</div>
 
             <label class="field-label">UWAGI DLA MECHANIKA</label>
-            <textarea id="client-note" class="input" rows="4" placeholder="Dodatkowe życzenia albo informacje..."></textarea>
+            <textarea id="client-note" class="input" rows="4" placeholder="Np. zależy mi na ciemnym wnętrzu, odbiór wieczorem..."></textarea>
+            <div class="cee-rp-mini">Po wysłaniu projektu mechanik może dopytać cię przez <b>aplikację (Discord)</b> lub czat w mieście. Nie musisz sam zmieniać żadnych statusów.</div>
           </div>
 
           <div class="card" style="padding:14px;margin:14px 0;border-color:#5a3674">
@@ -130,7 +140,7 @@
           </div>
 
           <div class="summary-actions">
-            <button id="save-project" class="btn primary wide">UTWÓRZ ZLECENIE</button>
+            <button id="save-project" class="btn primary wide">WYŚLIJ PROJEKT DO CENTRAL CEE</button>
             <button id="clear-build" class="btn ghost wide">Wyczyść</button>
           </div>
         </aside>
@@ -142,7 +152,8 @@
         <div class="card status-hero">
           <div class="eyebrow">CENTRAL CEE CUSTOMS • MOJE AUTO</div>
           <h2 style="margin:0 0 8px">Status zlecenia</h2>
-          <p class="muted">Wpisz kod śledzenia otrzymany przy tworzeniu zlecenia. Strona pokazuje aktualny status i wiadomości od warsztatu.</p>
+          <p class="muted">Wpisz kod śledzenia otrzymany przy tworzeniu projektu. Zobaczysz, gdzie jest auto i co warsztat chce, żebyś zrobił dalej.</p>
+          <div class="cee-rp-mini" style="margin-top:12px"><b>Nie zgaduj.</b> Jeśli warsztat czeka na twój ruch, poniżej pojawi się konkretna wiadomość: zostań przy recepcji, podjedź na stanowisko 1, zostaw auto na hali albo wróć po odbiór.</div>
           <div class="status-search">
             <input id="tracking-code" class="input" placeholder="np. HSC-8F3A1C...">
             <button id="tracking-check" class="btn primary">SPRAWDŹ</button>
@@ -165,9 +176,10 @@
   <script src="../data-parts-5.js"></script>
   <script src="../shared/hsc-common.js?v=6"></script>
   <script src="../shared/i18n-pl.js?v=6"></script>
-  <script src="../shared/pricing.js?v=5"></script>\n  <script src="../shared/part-rules.js?v=1"></script>
+  <script src="../shared/pricing.js?v=5"></script>
+  <script src="../shared/part-rules.js?v=2"></script>
   <script src="../shared/backend-config.js?v=1"></script>
   <script src="../shared/backend.js?v=1"></script>
-  <script src="client.js?v=8"></script>
+  <script src="client.js?v=12"></script>
 </body>
 </html>
