@@ -39,10 +39,83 @@ function listOrders(){return load(ORDERS_KEY)}
 function saveOrder(o){var a=listOrders(),i=a.findIndex(function(x){return x.id===o.id});if(i>=0)a[i]=o;else a.unshift(o);saveOrders(a);return o}
 function encode(obj,prefix){var s=unescape(encodeURIComponent(JSON.stringify(obj)));return prefix+':'+btoa(s)}
 function decode(code,prefix){if(String(code).indexOf(prefix+':')!==0)throw new Error('BAD_PREFIX');return JSON.parse(decodeURIComponent(escape(atob(String(code).slice(prefix.length+1)))))}
-function projectCode(p){return encode(p,'HSCP2')}
+function compactPartIndex(part){
+  var a=(window.HSC_DATA&&window.HSC_DATA.parts)||[];
+  for(var i=0;i<a.length;i++)if(a[i].category===part.category&&a[i].name===part.name)return i;
+  return -1
+}
+function serviceId(v){
+  var x=String(v||'').toLowerCase();
+  if(x.indexOf('diagnost')>=0)return'd';
+  if(x.indexOf('kół')>=0||x.indexOf('felg')>=0)return'k';
+  if(x.indexOf('zawies')>=0)return'z';
+  if(x.indexOf('hamul')>=0)return'h';
+  if(x.indexOf('lakier')>=0)return'l';
+  if(x.indexOf('detail')>=0||x.indexOf('przygot')>=0)return'e';
+  return String(v||'').slice(0,40)
+}
+function serviceName(v){
+  return {d:'Diagnostyka pełna',k:'Serwis kół / felg',z:'Serwis zawieszenia',h:'Serwis hamulców',l:'Lakiernia',e:'Detailing / przygotowanie'}[v]||v
+}
+function compactProject(p,noteLimit){
+  var parts=(p.parts||[]).map(function(x){
+    var i=compactPartIndex(x);
+    return i>=0?[i,x.color||'']:[-1,x.category||'',x.name||'',x.color||'']
+  });
+  return {
+    i:p.id||projectId(),
+    t:p.trackingCode||trackingCode(),
+    c:String(p.client||'').slice(0,32),
+    r:String(formatReg(p.registration)||'').replace(/\D/g,'').slice(-4),
+    v:p.vehicle&&p.vehicle.id||'',
+    a:p.paint||'',
+    p:parts,
+    s:(p.services||[]).map(serviceId),
+    n:String(p.note||'').slice(0,noteLimit==null?240:noteLimit)
+  }
+}
+function restoreCompact(x){
+  var data=window.HSC_DATA||{vehicles:[],parts:[]},vd=(data.vehicles||[]).find(function(v){return v.id===x.v})||{id:x.v,name:x.v,pack:'',itemId:''};
+  var parts=(x.p||[]).map(function(row){
+    if(row[0]>=0){
+      var d=(data.parts||[])[row[0]];
+      if(!d)return null;
+      return {category:d.category,name:d.name,color:row[1]||null}
+    }
+    return {category:row[1]||'',name:row[2]||'',color:row[3]||null}
+  }).filter(Boolean);
+  var services=(x.s||[]).map(serviceName);
+  var priced=window.HSCPricing?window.HSCPricing.calculate(parts,services):{total:0,mechanicCut:0,workshopCut:0};
+  var reg=makeChicagoReg(x.r||'');
+  return {
+    id:x.i||projectId(),
+    trackingCode:x.t||trackingCode(),
+    createdAt:new Date().toISOString(),
+    status:'PROJEKT KLIENTA',
+    client:x.c||'',
+    registration:reg,
+    vehicle:{id:vd.id,name:vd.name,pack:vd.pack||'',itemId:vd.itemId||''},
+    paint:x.a||null,
+    parts:parts,
+    services:services,
+    priceTotal:priced.total||0,
+    mechanicCut:priced.mechanicCut||0,
+    workshopCut:priced.workshopCut||0,
+    note:x.n||'',
+    history:[{at:new Date().toISOString(),text:'Projekt klienta zaimportowany do Central CEE Customs.'}]
+  }
+}
+function projectCode(p){
+  var code=encode(compactProject(p,240),'HSCP3');
+  if(code.length>1850)code=encode(compactProject(p,80),'HSCP3');
+  if(code.length>1850)code=encode(compactProject(p,0),'HSCP3');
+  return code
+}
 function parseProjectCode(c){
-  if(String(c).indexOf('HSCP2:')===0)return decode(c,'HSCP2');
-  if(String(c).indexOf('HSCP1:')===0)return decode(c,'HSCP1');
+  c=String(c||'').trim();
+  if(c.indexOf('HSCP3:')===0)return restoreCompact(decode(c,'HSCP3'));
+  if(c.indexOf('HSCP2:')===0)return decode(c,'HSCP2');
+  if(c.indexOf('HSCP1:')===0)return decode(c,'HSCP1');
   throw new Error('BAD_PREFIX')
 }
 function randomSalt(){return randomHex(16).toLowerCase()}
