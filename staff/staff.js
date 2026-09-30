@@ -15,7 +15,7 @@ function vehicleDef(id){return (DATA.vehicles||[]).find(function(v){return v.id=
 function compatibleParts(id){return (DATA.parts||[]).filter(function(p){return (p.cars||[]).indexOf(id)>=0})}
 
 function showApp(){q('#auth-screen').style.display='none';q('#staff-app').classList.remove('hidden');renderAll()}
-function showAuth(){q('#auth-screen').style.display='grid';q('#staff-app').classList.add('hidden');var first=!C.ownerPinExists();q('#auth-title').textContent=first?'Pierwsze uruchomienie Staff OS':'Weryfikacja pracownika';q('#auth-copy').textContent=first?'Ustaw PIN właściciela dla tego urządzenia.':'Wpisz PIN pracownika, aby otworzyć panel warsztatu.';q('#auth-submit').textContent=first?'Ustaw PIN i otwórz panel':'Zaloguj';q('#auth-note').textContent=first?'PIN jest teraz lokalny. Docelowe konta pracowników są przygotowane pod wspólną bazę Central CEE.':'';q('#staff-pin').value='';q('#staff-pin').focus()}
+function showAuth(){q('#auth-screen').style.display='grid';q('#staff-app').classList.add('hidden');var first=!C.ownerPinExists();q('#auth-title').textContent=first?'Pierwsze uruchomienie Staff OS':'Weryfikacja pracownika';q('#auth-copy').textContent=first?'Ustaw PIN właściciela dla tego urządzenia.':'Wpisz PIN pracownika, aby otworzyć panel warsztatu.';q('#auth-submit').textContent=first?'Ustaw PIN i otwórz panel':'Zaloguj';q('#auth-note').textContent=first?'PIN jest teraz lokalny. Docelowe konta pracowników są przygotowane pod wspólną bazę Cent\'s Detailing&Customs.':'';q('#staff-pin').value='';q('#staff-pin').focus()}
 async function auth(){var pin=q('#staff-pin').value.trim();if(pin.length<4)return toast('PIN musi mieć minimum 4 znaki.');try{if(!C.ownerPinExists()){await C.setupOwnerPin(pin);sessionStorage.setItem(SESSION,'1');showApp()}else if(await C.verifyOwnerPin(pin)){sessionStorage.setItem(SESSION,'1');showApp()}else toast('Nieprawidłowy PIN.')}catch(e){toast('Nie udało się zweryfikować PIN-u.')}}
 q('#auth-submit').onclick=auth;q('#staff-pin').addEventListener('keydown',function(e){if(e.key==='Enter')auth()});q('#logout').onclick=function(){sessionStorage.removeItem(SESSION);showAuth()};
 q('#staff-reset-test').onclick=function(){
@@ -94,7 +94,7 @@ function openProject(id){
 
 function createOrderFromProject(p){
  var now=new Date().toISOString(),total=Number(p.priceTotal)||0,mech=Number(p.mechanicCut)||Math.round(total*0.65),order={id:C.orderId(),projectId:p.id,trackingCode:p.trackingCode||C.trackingCode(),createdAt:now,client:p.client,registration:p.registration,vehicle:p.vehicle,paint:p.paint||null,parts:(p.parts||[]).slice(),services:(p.services||[]).slice(),priceTotal:total,mechanicCut:mech,workshopCut:total-mech,note:p.note||'',status:'PRZYJĘCIE',bay:null,paymentMethod:'NIE USTALONO',paymentStatus:'NIEOPŁACONE',history:(p.history||[]).slice()};
- addHistory(order,'Projekt został przyjęty przez Central CEE Customs. Zostań przy recepcji. Warsztat wyśle ci wezwanie, kiedy możesz podjechać autem na stanowisko 1.');
+ addHistory(order,'Projekt został przyjęty przez Cent\'s Detailing&Customs. Zostań przy recepcji. Warsztat wyśle ci wezwanie, kiedy możesz podjechać autem na stanowisko 1.');
  saveOrder(order);p.convertedOrderId=order.id;p.convertedAt=now;C.saveProject(p);closeModal();renderAll();setTab('orders');toast('Projekt przyjęty. Teraz w grze użyj terminala i wezwij klienta na stanowisko 1.');openOrder(order.id)
 }
 
@@ -130,8 +130,8 @@ function openOrder(id){
    q('#send-client-message').onclick=function(){var m=q('#client-message').value.trim();if(!m)return;addHistory(o,m);saveOrder(o);q('#client-message').value='';closeModal();openOrder(o.id);toast('Wiadomość zapisana.')};
    q('#save-basic').onclick=function(){saveFields();closeModal();renderAll();toast('Dane zapisane.')};
    if(q('#start-work'))q('#start-work').onclick=function(){if(!q('#edit-bay').value)return toast('Wybierz stanowisko 2–8.');saveFields();o.status='W TRAKCIE';addHistory(o,'Auto jest na stanowisku '+o.bay+'. Czekaj na informację z warsztatu.');saveOrder(o);closeModal();renderAll();toast('Praca rozpoczęta.')};
-   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();o.status='GOTOWE DO ODBIORU';addHistory(o,'Auto gotowe do odbioru. Wróć do recepcji Central CEE Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
-   if(q('#finish-order'))q('#finish-order').onclick=function(){saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność została przyjęta, a auto wydane. Zlecenie Central CEE Customs jest zakończone.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zakończone.')};
+   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();o.status='GOTOWE DO ODBIORU';addHistory(o,'Auto gotowe do odbioru. Wróć do recepcji Cent\'s Detailing&Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
+   if(q('#finish-order'))q('#finish-order').onclick=function(){saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność została przyjęta, a auto wydane. Zlecenie Cent\'s Detailing&Customs jest zakończone.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zakończone.')};
  },0)
 }
 
