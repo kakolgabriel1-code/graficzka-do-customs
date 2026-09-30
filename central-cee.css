@@ -416,7 +416,7 @@ a{color:#e5a47c}
 
 
 /* ===== Cent's Detailing&Customs v5 BRAND RESET =====
-   Old Central CEE artwork is intentionally hidden so no legacy name appears on the live site. */
+   Legacy artwork is intentionally hidden so no legacy name appears on the live site. */
 .cee-brandmark{
   background-image:none!important;
   width:auto!important;height:auto!important;min-width:230px!important;
