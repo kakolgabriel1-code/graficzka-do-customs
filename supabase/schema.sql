@@ -1,4 +1,4 @@
--- Hood Stories Customs — shared backend schema (Supabase/Postgres)
+-- Cent's Detailing&Customs — shared backend schema (Supabase/Postgres)
 -- v2: klient ma prywatny kod śledzenia i może odczytać tylko swój status.
 
 create table if not exists public.staff_profiles (
