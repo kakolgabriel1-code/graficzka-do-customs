@@ -13,7 +13,7 @@
     .status-wrap{max-width:900px;margin:0 auto}.status-hero{padding:28px;margin-bottom:16px}.status-search{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:18px}.status-result{margin-top:16px}.message-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}.message{padding:12px;border:1px solid #32213f;border-radius:12px;background:#100b15}.message b{display:block;font-size:10px;color:#a992b8}.message span{display:block;margin-top:4px;font-size:12px;line-height:1.5}.status-big{font-size:28px;font-weight:900;color:#dfa8ff}
     @media(max-width:1000px){.steps{grid-template-columns:1fr 1fr}}@media(max-width:650px){.steps{grid-template-columns:1fr}.client-nav{display:none}.status-search{grid-template-columns:1fr}}
   </style>
-  <link rel="stylesheet" href="../central-cee.css?v=3">
+  <link rel="stylesheet" href="../central-cee.css?v=4">
 </head>
 <body class="client-only">
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="noise"></div>
@@ -22,6 +22,7 @@
     <div class="client-nav">
       <button data-client-view="create" class="active">KONFIGURATOR</button>
       <button data-client-view="status">STATUS AUTA</button>
+      <button id="restart-client" class="cee-reset-link">ZACZNIJ OD NOWA</button>
     </div>
   </header>
 
@@ -49,40 +50,39 @@
       <div class="cee-category"><span class="ico">✦</span><b>Lakiernia</b><small>Warianty i wykończenie</small></div>
       <div class="cee-category"><span class="ico">⌘</span><b>Usługi</b><small>Pełna obsługa warsztatu</small></div>
     </div>
-      <div class="page-head">
-        <div><div class="eyebrow">CENTRAL CEE CUSTOMS • KONFIGURATOR</div><h2>Twój projekt</h2><p>Wybierz swoje auto i dokładnie zaznacz, co chcesz w nim zrobić.</p></div>
-      </div>
-
-      <div class="cee-rp-intro card">
+      <div class="cee-simple-head">
         <div>
-          <div class="eyebrow">CONCIERGE • JAK ZAŁATWIĆ AUTO</div>
-          <h3>Nie musisz znać systemu. Zrób tylko te 4 rzeczy.</h3>
-          <p>Resztę prowadzi mechanik i komunikaty z warsztatu.</p>
+          <div class="eyebrow">CENTRAL CEE CUSTOMS • KONFIGURATOR</div>
+          <h2>Nowe zlecenie</h2>
+          <p>Tylko 3 kroki. Strona pokaże ci wyłącznie to, czego potrzebujesz w danym momencie.</p>
         </div>
-        <div class="cee-rp-badge">CENTRAL CEE<br><b>CLIENT FLOW</b></div>
-      </div>
-      <div class="steps cee-rp-steps">
-        <div class="step"><b>01 • ZBUDUJ PROJEKT</b><span>Wybierz auto, lakier, modyfikacje i usługi. Przy częściach wybierz też kolor / wariant, jeśli jest dostępny.</span></div>
-        <div class="step"><b>02 • SPRAWDŹ DOKUMENTY</b><span>Przepisz swój nick i 4 cyfry rejestracji Chicago z książeczki pojazdu.</span></div>
-        <div class="step"><b>03 • WYŚLIJ PROJEKT</b><span>Po utworzeniu zlecenia skopiuj <strong>kod dla mechanika</strong> i wyślij go przez <strong>aplikację (Discord)</strong> albo czat w mieście.</span></div>
-        <div class="step"><b>04 • RECEPCJA</b><span>Podejdź do recepcji Central CEE Customs i zgłoś gotowy projekt. <strong>Nie wjeżdżaj na halę</strong>, dopóki warsztat nie wezwie cię na stanowisko 1.</span></div>
+        <div class="cee-client-progress">
+          <button class="active" data-client-step-nav="1"><span>1</span> AUTO</button>
+          <button data-client-step-nav="2"><span>2</span> MODYFIKACJE</button>
+          <button data-client-step-nav="3"><span>3</span> DANE I WYŚLIJ</button>
+        </div>
       </div>
 
-      <div class="card" style="padding:18px;margin-bottom:18px">
-        <div class="section-title"><div><span class="section-icon">$</span><h3>Cennik Central CEE Customs</h3></div><small>klient widzi ceny przed utworzeniem zlecenia</small></div>
-        <div id="price-list" class="detail-grid"></div>
-        <div class="note cee-concierge-note" style="margin-top:10px"><b>Wycena jest od razu widoczna.</b> Każda zaznaczona usługa i modyfikacja dolicza się automatycznie. Po przyjęciu projektu mechanik widzi ten sam zakres i tę samą kwotę.</div>
-      </div>
+      <details class="cee-price-details">
+        <summary>Sprawdź cennik</summary>
+        <div class="card" style="padding:16px;margin-top:10px">
+          <div id="price-list" class="detail-grid"></div>
+          <div class="cee-rp-mini" style="margin-top:10px">Cena projektu aktualizuje się automatycznie po każdym wyborze.</div>
+        </div>
+      </details>
 
       <div class="client-grid">
-        <aside class="card selector-panel">
+        <aside class="card selector-panel cee-step-panel active" data-client-step="1">
           <label class="field-label">ZNAJDŹ AUTO</label>
           <input id="vehicle-search" class="input" placeholder="np. Silvia S15, Audi Q8...">
           <div class="filter-row" id="pack-filters"></div>
           <div id="vehicle-list" class="vehicle-list"></div>
+          <div class="cee-step-footer">
+            <span>Wybierz model z dokumentów auta.</span>
+          </div>
         </aside>
 
-        <section class="config-panel">
+        <section class="config-panel cee-step-panel" data-client-step="2">
           <div id="vehicle-empty" class="card empty-state cee-empty-state">
             <div class="cee-empty-emblem"><div class="cee-brandmark large"><div class="cee-crown">♛</div><strong>Central CEE</strong><small>Customs</small></div></div>
             <div class="cee-empty-kicker">PRIVATE CONFIGURATOR</div>
@@ -102,7 +102,7 @@
             </div>
 
             <div class="card section-card">
-              <div class="section-title"><div><span class="section-icon">⌁</span><h3>Modyfikacje</h3></div><small>Tylko kompatybilne części</small></div><div class="note" style="margin-bottom:12px"><b>1 element = 1 slot.</b> Nie da się wybrać dwóch zestawów hamulcowych, dwóch kierownic, dwóch kompletów felg, dwóch spoilerów itd. Jeśli slot jest już zajęty, najpierw odznacz obecny element. Każda karta ma też krótki opis i informację o wyglądzie / kolorystyce.</div>
+              <div class="section-title"><div><span class="section-icon">⌁</span><h3>Modyfikacje</h3></div><small>Tylko kompatybilne części</small></div><div class="cee-rp-mini" style="margin-bottom:12px"><b>Jedno miejsce = jedna część.</b> Jeśli np. masz już wybrane hamulce albo spoiler, najpierw odznacz obecny wariant.</div>
               <div id="mod-tabs" class="tabs"></div>
               <div class="mod-tools"><input id="mod-search" class="input" placeholder="Szukaj części..."><span id="mod-count"></span></div>
               <div id="mod-grid" class="mod-grid"></div>
@@ -112,11 +112,16 @@
               <div class="section-title"><div><span class="section-icon">✦</span><h3>Usługi</h3></div><small>Opcjonalne</small></div>
               <div id="service-grid" class="service-grid"></div>
             </div>
+            <div class="cee-wizard-actions">
+              <button id="client-back-1" class="btn ghost">← ZMIEŃ AUTO</button>
+              <button id="client-next-3" class="btn primary">DALEJ: DANE I PODSUMOWANIE →</button>
+            </div>
           </div>
         </section>
 
-        <aside class="card build-panel">
-          <div id="client-next-step" class="cee-next-step cee-live-guide"><span class="rp-label">CO TERAZ</span><b>Wybierz samochód</b>, od którego zaczynamy projekt.</div>
+        <aside class="card build-panel cee-step-panel" data-client-step="3">
+          <div class="cee-step-title"><span>KROK 3 / 3</span><b>Dane i podsumowanie</b></div>
+          <div id="client-next-step" class="cee-next-step cee-live-guide"><b>Uzupełnij dane i wyślij projekt.</b></div>
           <div class="build-title" style="margin-top:14px"><span>TWOJE ZLECENIE</span><b id="build-count">0</b></div>
           <div id="build-summary" class="build-summary"><div class="mini-empty">Jeszcze nic nie wybrano.</div></div>
 
@@ -127,11 +132,11 @@
             <label class="field-label">REJESTRACJA CHICAGO</label>
             <input id="client-reg" class="input" inputmode="numeric" maxlength="4" placeholder="np. 4821">
             <div id="reg-preview" class="reg-preview">CHICAGO ----</div>
-            <div class="note">Wpisz tylko 4 cyfry z papierów pojazdu. Wszystkie auta w systemie mają teraz wyłącznie rejestracje Chicago.</div>
+            <div class="cee-rp-mini">Przepisz 4 cyfry z dokumentów auta.</div>
 
             <label class="field-label">UWAGI DLA MECHANIKA</label>
             <textarea id="client-note" class="input" rows="4" maxlength="240" placeholder="Np. zależy mi na ciemnym wnętrzu, odbiór wieczorem..."></textarea>
-            <div class="cee-rp-mini">Po wysłaniu projektu mechanik może dopytać cię przez <b>aplikację (Discord)</b> lub czat w mieście. Nie musisz sam zmieniać żadnych statusów.</div>
+            <div class="cee-rp-mini">Po wysłaniu projektu dalsze instrukcje dostaniesz od warsztatu.</div>
           </div>
 
           <div class="card" style="padding:14px;margin:14px 0;border-color:#5a3674">
@@ -142,7 +147,7 @@
 
           <div class="summary-actions">
             <button id="save-project" class="btn primary wide">WYŚLIJ PROJEKT DO CENTRAL CEE</button>
-            <button id="clear-build" class="btn ghost wide">Wyczyść</button>
+            <button id="client-back-2" class="btn ghost wide">← WRÓĆ DO MODYFIKACJI</button>
           </div>
         </aside>
       </div>
@@ -181,6 +186,6 @@
   <script src="../shared/part-rules.js?v=2"></script>
   <script src="../shared/backend-config.js?v=1"></script>
   <script src="../shared/backend.js?v=1"></script>
-  <script src="client.js?v=14"></script>
+  <script src="client.js?v=15"></script>
 </body>
 </html>
