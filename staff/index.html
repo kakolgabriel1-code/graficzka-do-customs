@@ -123,14 +123,13 @@
             <div class="section-title"><div><span class="section-icon">▤</span><h3>Nowe zamówienie części</h3></div><small>zamów część do aktywnego zlecenia</small></div>
             <label class="field-label">ZLECENIE</label>
             <select id="parts-order-id" class="input"></select>
-            <label class="field-label" style="margin-top:12px">KATEGORIA DOSTAWY</label>
-            <select id="parts-category" class="input"></select>
-            <label class="field-label" style="margin-top:12px">CZĘŚĆ / OPIS</label>
-            <input id="parts-name" class="input" placeholder="np. sportowy zestaw turbo SR20DET">
-            <label class="field-label" style="margin-top:12px">ILOŚĆ</label>
-            <input id="parts-qty" class="input" type="number" min="1" max="64" value="1">
-            <button id="parts-create" class="btn primary wide" style="margin-top:14px">ZAPISZ ZAMÓWIENIE</button>
-            <div class="cee-rp-mini">Wybierz zlecenie, wpisz część i zapisz. Potem kliknij <b>Akcja</b>.</div>
+            <label class="field-label" style="margin-top:12px">CZĘŚĆ ZE ZLECENIA</label>
+            <select id="parts-name" class="input">
+              <option value="">Najpierw wybierz zlecenie...</option>
+            </select>
+            <div id="parts-auto-category" class="cee-rp-mini" style="margin-top:8px">Kategoria dostawy ustawi się automatycznie.</div>
+            <button id="parts-create" class="btn primary wide" style="margin-top:14px">DODAJ DO DOSTAWY</button>
+            <div class="cee-rp-mini" style="margin-top:8px"><b>Jak to działa:</b> wybierz zlecenie → wybierz część → dodaj do dostawy → kliknij <b>OBSŁUŻ DOSTAWĘ</b>.</div>
           </div>
           <div class="card" style="padding:18px">
             <div class="section-title"><div><span class="section-icon">↧</span><h3>Aktywne dostawy</h3></div><small id="parts-count">0</small></div>
@@ -159,6 +158,6 @@
   <script src="../shared/part-rules.js?v=2"></script>
   <script src="../shared/backend-config.js?v=1"></script>
   <script src="../shared/backend.js?v=1"></script>
-  <script src="staff.js?v=13"></script>
+  <script src="staff.js?v=14"></script>
 </body>
 </html>
