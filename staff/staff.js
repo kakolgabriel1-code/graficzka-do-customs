@@ -102,8 +102,8 @@ function openOrder(id){
    q('#send-client-message').onclick=function(){var m=q('#client-message').value.trim();if(!m)return;addHistory(o,m);saveOrder(o);q('#client-message').value='';closeModal();openOrder(o.id);toast('Wiadomość zapisana.')};
    q('#save-basic').onclick=function(){saveFields();closeModal();renderAll();toast('Dane zapisane.')};
    if(q('#start-work'))q('#start-work').onclick=function(){if(!q('#edit-bay').value)return toast('Wybierz stanowisko 2–8.');saveFields();o.status='W TRAKCIE';addHistory(o,'Auto trafiło na stanowisko '+o.bay+'. Rozpoczęliśmy prace.');saveOrder(o);closeModal();renderAll();toast('Praca rozpoczęta.')};
-   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();o.status='GOTOWE DO ODBIORU';addHistory(o,'Twoje auto jest gotowe do odbioru. Podejdź do Hood Stories Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
-   if(q('#finish-order'))q('#finish-order').onclick=function(){saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność przyjęta. Auto zostało wydane. Dziękujemy za wizytę w Hood Stories Customs.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zakończone.')};
+   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();o.status='GOTOWE DO ODBIORU';addHistory(o,'Twoje auto jest gotowe do odbioru. Podejdź do Central CEE Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
+   if(q('#finish-order'))q('#finish-order').onclick=function(){saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność przyjęta. Auto zostało wydane. Dziękujemy za wizytę w Central CEE Customs.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zakończone.')};
  },0)
 }
 
