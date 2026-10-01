@@ -14,6 +14,20 @@ function saveOrder(o){C.saveOrder(o)}
 function vehicleDef(id){return (DATA.vehicles||[]).find(function(v){return v.id===id})}
 function compatibleParts(id){return (DATA.parts||[]).filter(function(p){return (p.cars||[]).indexOf(id)>=0})}
 
+function serviceGuideHtml(o){
+ var services=(o.services||[]).map(function(x){return String(x||'')});
+ var rows=[];
+ function has(re){return services.some(function(x){return re.test(x)})}
+ function row(title,tool,text){rows.push('<div class="detail-box"><span>'+C.esc(title)+(tool?' • narzędzie: '+C.esc(tool):'')+'</span><b>'+C.esc(text)+'</b></div>')}
+ if(has(/Diagnostyka/i))row('Diagnostyka pełna','Part Scanner','Podejdź do auta, użyj Part Scanner i sprawdź zamontowane części oraz sloty. Porównaj wynik ze zleceniem.');
+ if(has(/Lakiernia/i)||o.paint)row('Lakiernia','Paint Gun','Docelowy wariant: '+(o.paint||'zgodny ze zleceniem')+'. Zmień prawdziwy wariant pojazdu — nie tylko opis na stronie.');
+ if(has(/kół|felg/i))row('Serwis kół / felg','—','Sprawdź obecny zestaw. Jeśli zlecenie ma nowe felgi lub opony, odbierz komplet z dostawy i zamontuj dokładnie zamówiony wariant. Tire Machine traktuj tylko jako RP, jeśli mod nie wymaga jej technicznie.');
+ if(has(/hamulc/i))row('Serwis hamulców','—','Sprawdź obecne hamulce. Nowy fizyczny zestaw montuj tylko wtedy, gdy jest w częściach zlecenia.');
+ if(has(/zawieszen/i))row('Serwis zawieszenia','—','Sprawdź dostępne elementy zawieszenia i wymieniaj tylko części zapisane w zleceniu.');
+ if(has(/Detailing/i))row('Detailing / przygotowanie','—','Końcowa kontrola auta i przygotowanie do wydania. Bez udawania czynności, których mod technicznie nie obsługuje.');
+ return rows.length?'<div class="detail-grid">'+rows.join('')+'</div>':'<div class="mini-empty">Brak dodatkowych usług w tym zleceniu.</div>'
+}
+
 function showApp(){q('#auth-screen').style.display='none';q('#staff-app').classList.remove('hidden');renderAll()}
 function showAuth(){q('#auth-screen').style.display='grid';q('#staff-app').classList.add('hidden');var first=!C.ownerPinExists();q('#auth-title').textContent=first?'Pierwsze uruchomienie Staff OS':'Weryfikacja pracownika';q('#auth-copy').textContent=first?'Ustaw PIN właściciela dla tego urządzenia.':'Wpisz PIN pracownika, aby otworzyć panel warsztatu.';q('#auth-submit').textContent=first?'Ustaw PIN i otwórz panel':'Zaloguj';q('#auth-note').textContent=first?'PIN jest teraz lokalny. Docelowe konta pracowników są przygotowane pod wspólną bazę Cent\'s Detailing&Customs.':'';q('#staff-pin').value='';q('#staff-pin').focus()}
 async function auth(){var pin=q('#staff-pin').value.trim();if(pin.length<4)return toast('PIN musi mieć minimum 4 znaki.');try{if(!C.ownerPinExists()){await C.setupOwnerPin(pin);sessionStorage.setItem(SESSION,'1');showApp()}else if(await C.verifyOwnerPin(pin)){sessionStorage.setItem(SESSION,'1');showApp()}else toast('Nieprawidłowy PIN.')}catch(e){toast('Nie udało się zweryfikować PIN-u.')}}
@@ -119,7 +133,7 @@ function openOrder(id){
    :o.status==='GOTOWE DO ODBIORU'
     ?'<b>Teraz:</b> kliknij PRZYGOTUJ RACHUNEK → wklej komendę w Minecraft → terminal → ROZLICZENIE / WYDANIE → wybierz stanowisko. Klient płaci w recepcji kartą albo gotówką.'
     :'<b>Zakończone.</b> Auto zostało wydane.';
- modal('<div class="eyebrow">'+C.esc(o.id)+'</div><h2 style="margin:0 0 8px">'+C.esc(o.vehicle.name)+'</h2><div class="cee-next-step">'+guide+'</div><div class="detail-grid" style="margin-top:12px"><div class="detail-box"><span>Klient</span><b>'+C.esc(o.client)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(o.registration))+'</b></div><div class="detail-box"><span>Status</span><b>'+C.esc(o.status)+'</b></div><div class="detail-box"><span>Klient zapłaci</span><b>'+(P?P.money(Number(o.priceTotal)||0):(Number(o.priceTotal)||0)+' $')+'</b></div><div class="detail-box"><span>Twoja wypłata 65%</span><b>'+(P?P.money(Number(o.mechanicCut)||0):(Number(o.mechanicCut)||0)+' $')+'</b></div><div class="detail-box"><span>Kod statusu klienta</span><b>'+C.esc(o.trackingCode||'—')+'</b></div></div><h4>Podgląd pozycji — wypłata końcowa to dokładnie 65% całego rachunku</h4><div class="detail-grid">'+(payoutRows||'<div class="mini-empty">Brak pozycji do rozliczenia.</div>')+'</div><h4>Zakres zlecenia</h4><div class="part-list">'+parts+'</div><div class="modal-controls"><div><label class="field-label">STANOWISKO 2–8</label><select id="edit-bay" class="input">'+bays+'</select></div><div><label class="field-label">PŁATNOŚĆ</label><select id="edit-pay-method" class="input"><option '+(o.paymentMethod==='NIE USTALONO'?'selected':'')+'>NIE USTALONO</option><option '+(o.paymentMethod==='KARTA'?'selected':'')+'>KARTA</option><option '+(o.paymentMethod==='GOTÓWKA'?'selected':'')+'>GOTÓWKA</option></select></div></div><label class="field-label" style="margin-top:14px">WIADOMOŚĆ DLA KLIENTA</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="client-message" class="input" placeholder="Np. Część jest w drodze. Auto zostaje na stanowisku 4."><button id="send-client-message" class="btn ghost">DODAJ</button></div><label class="field-label" style="margin-top:14px">NOTATKI WARSZTATU</label><textarea id="order-note" class="input" rows="3">'+C.esc(o.note||'')+'</textarea><div id="simple-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"></div><h4>Historia / wiadomości klienta</h4><div class="message-list">'+((o.history||[]).length?(o.history||[]).slice().reverse().map(function(m){return '<div class="message"><b>'+new Date(m.at).toLocaleString('pl-PL')+'</b><span>'+C.esc(m.text)+'</span></div>'}).join(''):'<div class="mini-empty">Brak wiadomości.</div>')+'</div>');
+ modal('<div class="eyebrow">'+C.esc(o.id)+'</div><h2 style="margin:0 0 8px">'+C.esc(o.vehicle.name)+'</h2><div class="cee-next-step">'+guide+'</div><div class="detail-grid" style="margin-top:12px"><div class="detail-box"><span>Klient</span><b>'+C.esc(o.client)+'</b></div><div class="detail-box"><span>Rejestracja</span><b>'+C.esc(C.formatReg(o.registration))+'</b></div><div class="detail-box"><span>Status</span><b>'+C.esc(o.status)+'</b></div><div class="detail-box"><span>Klient zapłaci</span><b>'+(P?P.money(Number(o.priceTotal)||0):(Number(o.priceTotal)||0)+' $')+'</b></div><div class="detail-box"><span>Twoja wypłata 65%</span><b>'+(P?P.money(Number(o.mechanicCut)||0):(Number(o.mechanicCut)||0)+' $')+'</b></div><div class="detail-box"><span>Kod statusu klienta</span><b>'+C.esc(o.trackingCode||'—')+'</b></div></div><h4>Podgląd pozycji — wypłata końcowa to dokładnie 65% całego rachunku</h4><div class="detail-grid">'+(payoutRows||'<div class="mini-empty">Brak pozycji do rozliczenia.</div>')+'</div><h4>Zakres zlecenia</h4><div class="part-list">'+parts+'</div><h4>Instrukcje usług</h4>'+serviceGuideHtml(o)+'<div class="modal-controls"><div><label class="field-label">STANOWISKO 2–8</label><select id="edit-bay" class="input">'+bays+'</select></div><div><label class="field-label">PŁATNOŚĆ</label><select id="edit-pay-method" class="input"><option '+(o.paymentMethod==='NIE USTALONO'?'selected':'')+'>NIE USTALONO</option><option '+(o.paymentMethod==='KARTA'?'selected':'')+'>KARTA</option><option '+(o.paymentMethod==='GOTÓWKA'?'selected':'')+'>GOTÓWKA</option></select></div></div><label class="field-label" style="margin-top:14px">WIADOMOŚĆ DLA KLIENTA</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="client-message" class="input" placeholder="Np. Część jest w drodze. Auto zostaje na stanowisku 4."><button id="send-client-message" class="btn ghost">DODAJ</button></div><label class="field-label" style="margin-top:14px">NOTATKI WARSZTATU</label><textarea id="order-note" class="input" rows="3">'+C.esc(o.note||'')+'</textarea><div id="simple-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"></div><h4>Historia / wiadomości klienta</h4><div class="message-list">'+((o.history||[]).length?(o.history||[]).slice().reverse().map(function(m){return '<div class="message"><b>'+new Date(m.at).toLocaleString('pl-PL')+'</b><span>'+C.esc(m.text)+'</span></div>'}).join(''):'<div class="mini-empty">Brak wiadomości.</div>')+'</div>');
  setTimeout(function(){
    function saveFields(){var b=q('#edit-bay').value;o.bay=b?Number(b):null;o.paymentMethod=q('#edit-pay-method').value;o.note=q('#order-note').value.trim();saveOrder(o)}
    var box=q('#simple-actions'),btn=['<button id="save-basic" class="btn ghost">ZAPISZ DANE</button>'];
@@ -150,6 +164,16 @@ function renderBays(){
 
 function getPartsOrders(){try{return JSON.parse(localStorage.getItem(PARTS_KEY)||'[]')}catch(e){return[]}}
 function savePartsOrders(a){localStorage.setItem(PARTS_KEY,JSON.stringify(a))}
+function samePartOrder(x,orderId,index,part){
+ if(!x||x.orderId!==orderId||x.state==='ANULOWANE')return false;
+ if(x.partIndex!==undefined&&x.partIndex!==null&&x.partIndex!=='')return Number(x.partIndex)===Number(index);
+ var raw=String((part&&part.name)||part||''),color=String((part&&part.color)||'');
+ return String(x.rawName||x.name||'')===raw&&String(x.color||'')===color
+}
+function partOrderStatus(orderId,index,part){
+ var hit=getPartsOrders().find(function(x){return samePartOrder(x,orderId,index,part)});
+ return hit?hit.state:null
+}
 
 const CENTS_VALID_PART_IDS=new Set([11316043,12793415,20351911,23924084,38870799,44739527,49756079,54384158,55918972,88847639,104370957,109384145,116932450,128494942,137254784,138107598,160227850,164309139,166091375,171452022,183958164,190069777,193910064,194158506,203813862,212303047,219833782,221107415,226185421,249211112,253484210,257878212,258777824,267842027,271213845,274350172,275031290,276027433,283695483,284619646,297613685,304419070,314609651,316827608,328012926,331984582,346512173,371391705,378912194,380862055,382197772,384271848,386848320,392704627,397511040,401049467,402475541,404298779,404685324,414611775,423187356,423708243,434604705,437093149,438902612,441458785,441937346,445413045,449213361,450695811,456532035,458373868,460427176,465945662,470619043,484937562,490851791,495835410,496236543,508174532,510934160,513636736,513828007,528835150,533560753,553025149,553786508,557538451,561810862,561936916,563969593,569302698,589032321,591888643,597080450,598341003,609580740,613768143,614621440,615188619,615748362,624097191,630209539,633910569,643000098,655455836,660849053,661532052,664788051,666460757,670747060,674348109,679918904,684488038,687454278,689936870,695747446,705345097,711071371,714918838,725205977,725402794,726076956,738192256,740231337,742246033,742382733,743529046,755337131,756550131,762100875,785849719,785976564,789553395,797683942,799567057,808150159,808396732,816715696,821409042,827666071,830157772,838962909,848947585,849474885,855919822,867036841,869292734,872086095,878796207,879889721,881152085,888629499,894784477,904511782,905267110,912468739,918683070,920864490,921441717,927844438,948692917,961016170,967103578,970343758,979139575,981840379,984112809,984917818,996758231,1011179734,1024911957,1028830707,1038263265,1042573019,1058003581,1067881420,1069545120,1082336464,1087623691,1091414918,1096215543,1101389970,1111633660,1115682692,1119877977,1133539841,1150317460,1154273814,1163165125,1169310149,1188286482,1195793473,1199302415,1200220117,1207238574,1212738250,1218163464,1222631615,1226291222,1248574666,1248901058,1250494259,1251230322,1252836207,1265702800,1298966086,1318173283,1318649562,1321018434,1324355373,1327300131,1337237891,1341990696,1378598776,1411699972,1412647242,1417223894,1428536823,1433333259,1435581340,1437269734,1438184903,1438798260,1444243556,1444494082,1445314442,1446607121,1463499788,1472913373,1474617080,1482842907,1486473261,1494972566,1506250875,1511079781,1536834868,1551488971,1557994791,1558940330,1561243202,1565057423,1573728565,1578157703,1580681565,1581835042,1584923836,1585399588,1593149488,1602316944,1605506768,1618431394,1624154397,1625052737,1628509745,1650595452,1655058679,1658371914,1659581707,1669360227,1673258565,1677341548,1677415612,1684069219,1684174778,1684186747,1694749275,1695580752,1701956848,1704252623,1709767445,1727554050,1737223053,1740884774,1742380277,1744211228,1749199693,1749413392,1757856676,1761518005,1763663472,1771791677,1772799974,1773391471,1776024277,1784829067,1784915855,1789997063,1792146992,1793123517,1799634720,1809562827,1810534809,1811619432,1817734943,1836587282,1839740620,1840328631,1843113624,1844953199,1848685228,1851572155,1856080441,1856566183,1857893892,1867836733,1869679371,1874035432,1877637141,1880287661,1887328356,1894220559,1908107274,1918554286,1919301303,1931627823,1939802399,1950384704,1960226683,1970042919,1982698321,1989548248,1993672276,1998936298,2013020883,2015474402,2021134363,2029119780,2040627717,2041655565,2041963978,2054390311,2063320144,2066166724,2075275023,2081019274,2082179463,2098957671,2099344873,2105003120,2122315688,2123652571,2124024898,2126821575,2137218258,2139139321,2140234602,2140988490]);
 function centsNormalizePartName(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'')}
@@ -191,8 +215,14 @@ function fillPartsForSelectedOrder(){
   if(hint)hint.textContent='Klient nie wybrał żadnej części / modyfikacji.';
   return
  }
+ var deliveries=getPartsOrders();
  sel.innerHTML='<option value="">Wybierz część...</option>'+parts.map(function(p,i){
    var label=T.part(p.name||p)+(p.color?' • '+p.color:'');
+   var existing=deliveries.find(function(x){return samePartOrder(x,oid,i,p)});
+   if(existing){
+    var st=existing.state==='ODEBRANE'?'✓ ODEBRANE':existing.state==='W DRODZE'?'W DRODZE':'DO URUCHOMIENIA';
+    return '<option value="'+partOrderValue(p,i)+'" disabled>'+C.esc(label+' — '+st)+'</option>'
+   }
    return '<option value="'+partOrderValue(p,i)+'">'+C.esc(label)+'</option>'
  }).join('');
  if(hint)hint.textContent='Wybierz dokładnie tę część, którą chcesz sprowadzić.'
@@ -202,7 +232,7 @@ function updatePartCategoryHint(){
  var p=parsePartOrderValue(v);
  if(!p){hint.textContent='Kategoria dostawy ustawi się automatycznie.';return}
  var id=deliveryCategoryFor({category:p.c,name:p.n}),cc=partCats.find(function(x){return x.id===id});
- hint.innerHTML='Dostawa: <b>'+C.esc(cc?cc.name:'Pozostałe części')+'</b> • 1 zestaw'
+ hint.innerHTML='Dostawa: <b>'+C.esc(cc?cc.name:'Pozostałe części')+'</b> • komplet zgodny z mappingiem części'
 }
 function renderPartsOrders(){
  var os=q('#parts-order-id');if(!os)return;
@@ -216,7 +246,7 @@ function renderPartsOrders(){
  q('#parts-list').innerHTML=active.length?active.map(function(x){
    var i=all.indexOf(x);
    var state=x.state==='W DRODZE'?'W DRODZE':'DO URUCHOMIENIA';
-   return '<div class="order-row" style="grid-template-columns:1.15fr 1.7fr .8fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>1 zestaw'+(x.color?' • '+C.esc(x.color):'')+'</small></div><div><span class="status-pill">'+C.esc(state)+'</span></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">OBSŁUŻ DOSTAWĘ</button></div></div>'
+   return '<div class="order-row" style="grid-template-columns:1.15fr 1.7fr .8fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>komplet wg mappingu'+(x.color?' • '+C.esc(x.color):'')+'</small></div><div><span class="status-pill">'+C.esc(state)+'</span></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">OBSŁUŻ DOSTAWĘ</button></div></div>'
  }).join(''):'<div class="mini-empty">Brak aktywnych dostaw.</div>';
  qa('[data-part-action]').forEach(function(b){b.onclick=function(){openPartsAction(Number(b.getAttribute('data-part-action')))}})
 }
@@ -263,9 +293,13 @@ q('#parts-create').onclick=function(){
  var cat=deliveryCategoryFor(part),cc=partCats.find(function(x){return x.id===cat});
  var rawName=part.name||part,name=T.part(rawName),color=part.color||'',deliveryId=centsDeliveryId(rawName);
  if(!centsCanDeliver(rawName))return toast('Ta część nie ma jeszcze potwierdzonego fizycznego itemu w GT Craft. Nie uruchamiam błędnej dostawy.');
- var a=getPartsOrders();
- if(a.some(function(x){return x.orderId===oid&&x.name===name&&x.color===color&&x.state!=='ODEBRANE'&&x.state!=='ANULOWANE'}))return toast('Ta część ma już aktywną dostawę.');
- a.unshift({id:'PART-'+Date.now(),orderId:oid,category:cat,categoryName:cc?cc.name:'Pozostałe części',name:name,rawName:rawName,deliveryId:deliveryId,color:color,qty:1,state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});
+ var a=getPartsOrders(),partIndex=Number(picked.i);
+ var existing=a.find(function(x){return samePartOrder(x,oid,partIndex,part)});
+ if(existing){
+  if(existing.state==='ODEBRANE')return toast('Ta część została już odebrana. Nie można zamówić jej drugi raz.');
+  return toast('Ta część ma już aktywną dostawę.')
+ }
+ a.unshift({id:'PART-'+Date.now(),orderId:oid,partIndex:partIndex,category:cat,categoryName:cc?cc.name:'Pozostałe części',name:name,rawName:rawName,deliveryId:deliveryId,color:color,qty:null,qtyMode:'MAPPING',state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});
  savePartsOrders(a);q('#parts-name').value='';updatePartCategoryHint();renderPartsOrders();toast('Dodano do dostawy. Teraz kliknij OBSŁUŻ DOSTAWĘ.')
 };
 
