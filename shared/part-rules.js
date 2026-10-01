@@ -149,81 +149,19 @@ function description(category,name){
   return map[s]||'Element modyfikacji przypisany do konkretnego miejsca montażowego w aucie.'
 }
 
-var rimColors={
- '5Zigen ProRacer Z1':'bazowy, srebrny',
- '5Zigen ProRacer ZR5F':'bazowy, czarny, srebrny',
- '5Zigen T7R':'bazowy, czarny, brązowy, szary, srebrny',
- 'ADVAN GT':'bazowy, niebieski, brązowy, złoty, jasnozielony, czerwony, żółty',
- 'ADVAN Oni2':'bazowy, czarny, żółty, niebieski, złoty, srebrny',
- 'ADVAN RG-D2':'bazowy, czarny, złoty, niebieski, czerwony, brązowy',
- 'ADVAN RG3':'bazowy, czarny, brązowy, niebieski, czerwony, złoty',
- 'ADVAN RS2':'bazowy, czarny, ciemnozielony, niebieski, czerwony, złoty, srebrny, szary',
- 'ADVAN RT':'bazowy, czarny, srebrny',
- 'ADVAN SA3':'bazowy, czarny, żółty, niebieski, czerwony, srebrny, brązowy',
- 'BBS LM-R':'bazowy, czarny, złoty, szary, srebrny',
- 'ENKEI GTC01RR':'bazowy, czarny, złoty, brązowy, szary, srebrny',
- 'ENKEI NT03RR':'bazowy, czarny, złoty, brązowy, szary, srebrny',
- 'ENKEI PF-01':'bazowy, czarny, złoty',
- 'ENKEI PF-06':'bazowy, czarny, złoty, czerwony',
- 'ENKEI RPF1':'bazowy, czarny, złoty, brązowy, szary, czerwony, niebieski',
- 'ENKEI RS05RR':'bazowy, srebrny, złoty, brązowy, szary',
- 'OZ Racing Crono':'bazowy, srebrny, złoty, czarny',
- 'OZ Racing Crono HT':'bazowy, srebrny',
- 'OZ Racing Mito':'bazowy, szary',
- 'OZ Racing Superturismo':'bazowy, szary, srebrny, czarny',
- 'Panasport C5C':'bazowy, czarny, czerwony, złoty, srebrny',
- 'RAYS Volk Racing 21A':'bazowy, złoty, srebrny, szary, czerwony',
- 'RAYS Volk Racing 57C6':'bazowy, różowy, srebrny, niebieski, czerwony, żółty, czarny',
- 'RAYS Volk Racing 57CR':'bazowy, czarny, srebrny, niebieski, czerwony, żółty',
- 'RAYS Volk Racing CE28':'bazowy, biały, czerwono-szary, srebrno-czarny, czerwony, srebrno-szary, złoty, brązowy, czarny',
- 'RAYS Volk Racing TE37':'bazowy, biały, zielony, niebieski, czerwony, żółty, jasnożółty, szary',
- 'RAYS Volk Racing TE37 Gravel':'bazowy, czarny, brązowy, złoty',
- 'RS Watanabe':'bazowy, złoty, brązowy',
- 'SuperAdvanRacing Ver2':'bazowy, złoty, szary, niebieski, czerwony, żółty',
- 'WORK Meister CR01':'bazowy, złoty, brązowy, szary, czarny',
- 'WORK Meister L1':'bazowy, złoty, czarny, szary, srebrny',
- 'WORK Meister S1':'bazowy, złoty, czarny, srebrny',
- 'Yokohama AVS Model T5':'bazowy, czarny, srebrny'
-};
+var exactVariantOptions={"GT Sports Air Cleaner":["żółty","niebieski","zielony","fioletowy"],"Yokohama Advan A052[Tail-Slide]":["czarny","czarny z oznaczeniem / naklejką"],"5Zigen T7R":["bazowy","czarny","brązowy","szary","srebrny"],"MOMO Tuner":["bazowy","ciemnoszary","srebrny"],"Rollcage Toyota AE86 Spec":["bazowy","czerwony","niebieski","biały","żółty"],"Yokohama Advan DB[Hi-Grip]":["czarny","czarny z oznaczeniem / naklejką"],"Generic Towerbar Type1":["czerwony","niebieski","zielony","fioletowy","żółty","biały","czarny"],"GT SemiRacing Air Cleaner":["czerwony","niebieski","zielony","fioletowy","żółty","biały"],"Rollcage Mazda RX-7 FC3S Spec":["bazowy","czerwony","niebieski","biały","żółty"],"Generic Towerbar Type2":["czarny","niebieski","zielony","fioletowy","żółty","biały","czerwony"],"Generic Shiftlever Type2":["bazowy","czerwony","niebieski","srebrny","czarny","brązowy"],"Generic Shiftlever Type3":["bazowy","czerwony","niebieski","srebrny","fioletowy"],"Generic Shiftlever Type1":["bazowy","czerwony","niebieski","srebrny","fioletowy"],"RAYS Volk Racing 21A":["bazowy","złoty","srebrny","szary","czerwony"],"RAYS Volk Racing CE28":["bazowy","biały","czerwono-szary","srebrno-czarny","czerwony","srebrno-szary","złoty","brązowy","czarny"],"Rollcage Toyota A80 Supra Spec":["bazowy","czerwony","niebieski","biały","żółty"],"Generic Shiftlever Type4":["bazowy","czerwony","niebieski","srebrny","fioletowy"],"Generic Rollcage Type2(Skyline Spec)":["bazowy","czerwony","niebieski","biały","żółty"],"Generic Handbrake Type2":["bazowy","czerwony","niebieski","srebrny","fioletowy"],"Sparco Seats":["bazowy","czarny","niebieski","biały","srebrny","żółty","zielony","różowy"],"Generic Handbrake Type1":["bazowy","czerwony","niebieski","srebrny","fioletowy"],"ADVAN Oni2":["bazowy","czarny","żółty","niebieski","złoty","srebrny"],"OZ Racing Superturismo":["bazowy","szary","srebrny","czarny"],"ADVAN RS2":["bazowy","czarny","ciemnozielony","niebieski","czerwony","złoty","srebrny","szary"],"ADVAN SA3":["bazowy","czarny","żółty","niebieski","czerwony","srebrny","brązowy"],"ENKEI RS05RR":["bazowy","srebrny","złoty","brązowy","szary"],"Generic Rear Seats":["bazowy","czerwony","niebieski"],"ENKEI RPF1":["bazowy","czarny","złoty","brązowy","szary","czerwony","niebieski"],"ADVAN RG3":["bazowy","czarny","brązowy","niebieski","czerwony","złoty"],"Yokohama Advan Apex[DynamicDrift]":["czarny","czarny z oznaczeniem / naklejką"],"RAYS Volk Racing 57C6":["bazowy","różowy","srebrny","niebieski","czerwony","żółty","czarny"],"BBS LM-R":["bazowy","czarny","złoty","szary","srebrny"],"ADVAN RT":["bazowy","czarny","srebrny"],"GT Towing Hook":["bazowy","czerwony","biały","niebieski","limonkowy","pomarańczowy"],"ADVAN GT":["bazowy","niebieski","brązowy","złoty","jasnozielony","czerwony","żółty"],"WORK Meister L1":["bazowy","złoty","czarny","szary","srebrny"],"RS Watanabe":["bazowy","złoty","brązowy"],"Recaro Seats":["bazowy","czarny","niebieski","biały","srebrny","żółty","zielony","różowy"],"Caron Sports Muffler":["wzór 1","wzór 2"],"ENKEI PF-06":["bazowy","czarny","złoty","czerwony"],"ENKEI PF-01":["bazowy","czarny","złoty"],"WORK Meister S1":["bazowy","złoty","czarny","srebrny"],"RAYS Volk Racing TE37 Gravel":["bazowy","czarny","brązowy","złoty"],"GT Towing Hook 2":["bazowy","czerwony","biały","niebieski","limonkowy","pomarańczowy"],"Panasport C5C":["bazowy","czarny","czerwony","złoty","srebrny"],"SuperAdvanRacing Ver2":["bazowy","złoty","szary","niebieski","czerwony","żółty"],"MOMO Prototipo":["czarny + srebrne ramiona","czarny"],"ADVAN RG-D2":["bazowy","czarny","złoty","niebieski","czerwony","brązowy"],"5Zigen ProRacer Z1":["bazowy","srebrny"],"GT Racing Air Cleaner":["niebieski","czerwony","zielony","fioletowy","żółty","biały"],"Rollcage Mazda RX-7 FD3S Spec":["bazowy","czerwony","niebieski","biały","żółty"],"MOMO Steering":["MOD.08 — bazowy","MOD.08 — niebieski","MOD.08 — czerwony","DRIFTING — niebieski","DRIFTING — pomarańczowy","DRIFTING — czerwony","DRIFTING — biały"],"Generic Rollcage Type1(Silvia Spec)":["bazowy","czerwony","niebieski","biały","żółty"],"OZ Racing Mito":["bazowy","szary"],"RAYS Volk Racing TE37":["bazowy","biały","zielony","niebieski","czerwony","żółty","jasnożółty","szary"],"5Zigen ProRacer ZR5F":["bazowy","czarny","srebrny"],"Recaro SR3":["bazowy","czarny","niebieski","biały","srebrny","żółty","zielony","różowy"],"OZ Racing Crono":["bazowy","srebrny","złoty","czarny"],"RAYS Volk Racing 57CR":["bazowy","czarny","srebrny","niebieski","czerwony","żółty"],"ENKEI GTC01RR":["bazowy","czarny","złoty","brązowy","szary","srebrny"],"WORK Meister CR01":["bazowy","złoty","brązowy","szary","czarny"],"Yokohama AVS Model T5":["bazowy","czarny","srebrny"],"OZ Racing Crono HT":["bazowy","srebrny"],"Rollcage Subaru Impreza GC8 Spec":["bazowy","czerwony","niebieski","biały","żółty"],"Caron Sports Twin Muffler":["wzór 1","wzór 2"],"ENKEI NT03RR":["bazowy","czarny","złoty","brązowy","szary","srebrny"]};
 
 function colorOptions(category,name){
-  var c=String(category||''),n=String(name||''),l=low(n),s=slot(c,n);
+  var n=String(name||'');
+  return exactVariantOptions[n]?exactVariantOptions[n].slice():[];
+}
 
-  if(c==='Wheels / Rims' && rimColors[n]){
-    return rimColors[n].split(',').map(function(x){return x.trim()}).filter(Boolean);
-  }
-
-  if(c==='Tires') return ['czarny','czarny z oznaczeniem / naklejką'];
-  if(s==='engine:air-cleaner'){
-    if(/racing/i.test(n)&&!/semi/i.test(n)) return ['niebieski','czerwony','zielony','fioletowy','żółty','biały'];
-    if(/semiracing/i.test(n)) return ['czerwony','niebieski','zielony','fioletowy','żółty','biały'];
-    return ['żółty','niebieski','zielony','fioletowy'];
-  }
-  if(s==='exterior:towing-hook') return ['bazowy','czerwony','biały','niebieski','limonkowy','pomarańczowy'];
-
-  if(s==='interior:steering-wheel'){
-    if(/momo retro/i.test(n)) return ['czarny + srebrne ramiona'];
-    if(/momo prototipo/i.test(n)) return ['czarny + srebrne ramiona','czarny'];
-    if(/momo steeringwheel 1/i.test(n)) return ['czarny / ciemnoszary'];
-    if(/momo steeringwheel 2/i.test(n)) return ['ciemny'];
-    if(/momo tuner/i.test(n)) return ['bazowy','ciemnoszary','srebrny'];
-    if(/^momo steering$/i.test(n)) return ['niebieski akcent','czerwony akcent','pomarańczowy akcent','biały akcent'];
-    return [];
-  }
-  if(s==='interior:front-seats'){
-    if(/recaro|sparco/i.test(n)) return ['bazowy','czarny','niebieski','biały','srebrny','żółty','zielony','różowy'];
-    return [];
-  }
-  if(s==='interior:rear-seats') return ['bazowy','czerwony','niebieski'];
-  if(s==='interior:roll-cage') return ['bazowy','czerwony','niebieski','biały','żółty'];
-  if(s==='interior:shift-lever'){
-    if(/type2/i.test(n)) return ['bazowy','czerwony','niebieski','srebrny','czarny','brązowy'];
-    return ['bazowy','czerwony','niebieski','srebrny','fioletowy'];
-  }
-  if(s==='interior:handbrake') return ['bazowy','czerwony','niebieski','srebrny','fioletowy'];
-  if(s==='performance:towerbar') return ['czerwony','niebieski','zielony','fioletowy','żółty','biały','czarny'];
-
-  return [];
+function deliveryQuantity(category,name){
+  var s=slot(category,name);
+  if(s==='wheels:set'||s==='tires:set')return 4;
+  if(s==='interior:front-seats'||s==='interior:rear-seats')return 2;
+  if(s==='suspension:front'||s==='suspension:rear')return 2;
+  return 1;
 }
 
 function appearance(category,name){
@@ -291,5 +229,5 @@ function validateParts(parts){
   return conflicts
 }
 
-return {slot:slot,slotLabel:slotLabel,description:description,appearance:appearance,colorOptions:colorOptions,findConflict:findConflict,validateParts:validateParts};
+return {slot:slot,slotLabel:slotLabel,description:description,appearance:appearance,colorOptions:colorOptions,deliveryQuantity:deliveryQuantity,findConflict:findConflict,validateParts:validateParts};
 })();
