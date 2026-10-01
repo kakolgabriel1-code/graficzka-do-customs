@@ -49,18 +49,18 @@ function renderStaffNow(){
  var work=orders.find(function(o){return o.status==='W TRAKCIE'});
  if(projects.length) box.innerHTML='<b>Następny krok:</b> otwórz projekt klienta i kliknij „Przyjmij zlecenie”.';
  else if(intake) box.innerHTML='<b>Następny krok:</b> terminal w grze → „Wezwij klienta na stanowisko 1”.';
- else if(work) box.innerHTML='<b>Następny krok:</b> wykonuj zakres zlecenia. Brakuje części? Otwórz „Części / dostawy”.';
+ else if(work) box.innerHTML=Number(work.bay)===8?'<b>Następny krok:</b> Lakiernia (8) → Paint Gun → dokładny kolor → AUTO GOTOWE.':(work.paint?'<b>Następny krok:</b> zwykłe prace na 2–5, potem Lakiernia (8).':'<b>Następny krok:</b> wykonuj zakres zlecenia na 2–5. Brakuje części? Otwórz „Części / dostawy”.');
  else if(ready) box.innerHTML='<b>Następny krok:</b> odbiór klienta → płatność → wydanie auta.';
  else box.innerHTML='<b>Następny krok:</b> czekaj na kod projektu od klienta.'
 }
 function renderMetrics(){
  var projects=activeProjects().length;
  var orders=C.listOrders().filter(function(o){return o.status!=='WYDANE'}).length;
- var occupied=C.listOrders().filter(function(o){return o.status!=='WYDANE'&&Number(o.bay)>=2&&Number(o.bay)<=8}).length;
+ var occupied=C.listOrders().filter(function(o){var b=Number(o.bay);return o.status!=='WYDANE'&&((b>=2&&b<=5)||b===8)}).length;
  var deliveries=getPartsOrders().filter(function(x){return x.state!=='ODEBRANE'&&x.state!=='ANULOWANE'}).length;
  if(q('#metric-projects'))q('#metric-projects').textContent=projects;
  if(q('#metric-orders'))q('#metric-orders').textContent=orders;
- if(q('#metric-bays'))q('#metric-bays').textContent=occupied+' / 7';
+ if(q('#metric-bays'))q('#metric-bays').textContent=occupied+' / 5';
  if(q('#metric-parts'))q('#metric-parts').textContent=deliveries
 }
 function renderAll(){renderProjects();renderOrders();renderBays();renderPartsOrders();renderMetrics();renderStaffNow()}
@@ -125,11 +125,11 @@ function openOrder(id){
  var priced=P?P.calculate(o.parts||[],[]):{rows:[],total:Number(o.priceTotal)||0,mechanicCut:Number(o.mechanicCut)||0};
  if(o.priceTotal!=null&&Number(o.priceTotal)!==priced.total){priced.total=Number(o.priceTotal);priced.mechanicCut=Number(o.mechanicCut)||priced.mechanicCut}
  var payoutRows=(priced.rows||[]).map(function(r){return '<div class="detail-box"><span>'+C.esc(T.part(r.name||'Pozycja'))+' • '+P.money(r.price)+'</span><b>udział ~65%: '+P.money(r.mechanicPayout)+'</b></div>'}).join('');
- var bays=['','2','3','4','5','6','7','8'].map(function(b){return '<option value="'+b+'" '+(String(o.bay||'')===b?'selected':'')+'>'+(b?'Stanowisko '+b:'Jeszcze nie wybrano')+'</option>'}).join('');
+ var bays=['','2','3','4','5','8'].map(function(b){var label=!b?'Jeszcze nie wybrano':(b==='8'?'Lakiernia — stanowisko 8':'Stanowisko '+b);return '<option value="'+b+'" '+(String(o.bay||'')===b?'selected':'')+'>'+label+'</option>'}).join('');
  var guide=o.status==='PRZYJĘCIE'
-  ?'<b>Teraz:</b> terminal w grze → WEZWIJ NA STANOWISKO 1 → oględziny → przydziel 2–8.'
+  ?'<b>Teraz:</b> terminal w grze → WEZWIJ NA STANOWISKO 1 → oględziny → przydziel zwykłe stanowisko 2–5.'
   :o.status==='W TRAKCIE'
-   ?'<b>Teraz:</b> wykonuj zakres zlecenia. Po skończeniu oznacz AUTO GOTOWE.'
+   ?(Number(o.bay)===8?'<b>Teraz:</b> auto jest w LAKIERNI (8). Użyj Paint Gun, ustaw dokładny kolor z projektu, potem AUTO GOTOWE → LAKIERNIA (8).':(o.paint?'<b>Teraz:</b> wykonaj zwykłe prace na stanowisku 2–5. Na końcu terminal → LAKIERNIA / LAKIEROWANIE → przenieś auto na 8.':'<b>Teraz:</b> wykonuj zakres zlecenia na stanowisku 2–5. Po skończeniu oznacz AUTO GOTOWE.'))
    :o.status==='GOTOWE DO ODBIORU'
     ?'<b>Teraz:</b> kliknij PRZYGOTUJ RACHUNEK → wklej komendę w Minecraft → terminal → ROZLICZENIE / WYDANIE → wybierz stanowisko. Klient płaci w recepcji kartą albo gotówką.'
     :'<b>Zakończone.</b> Auto zostało wydane.';
@@ -138,7 +138,7 @@ function openOrder(id){
    function saveFields(){var b=q('#edit-bay').value;o.bay=b?Number(b):null;o.paymentMethod=q('#edit-pay-method').value;o.note=q('#order-note').value.trim();saveOrder(o)}
    var box=q('#simple-actions'),btn=['<button id="save-basic" class="btn ghost">ZAPISZ DANE</button>'];
    if(o.status==='PRZYJĘCIE')btn.push('<button id="start-work" class="btn primary">ROZPOCZNIJ PRACĘ</button>');
-   if(o.status==='W TRAKCIE')btn.push('<button id="mark-ready" class="btn primary">AUTO GOTOWE</button>');
+   if(o.status==='W TRAKCIE'){if(o.paint&&Number(o.bay)>=2&&Number(o.bay)<=5)btn.push('<button id="move-paint" class="btn primary">AUTO W LAKIERNI (8)</button>');btn.push('<button id="mark-ready" class="btn primary">AUTO GOTOWE</button>');}
    if(o.status==='GOTOWE DO ODBIORU'){btn.push('<button id="prepare-bill" class="btn primary">PRZYGOTUJ RACHUNEK</button>');btn.push('<button id="finish-order" class="btn ghost">ZAMKNIJ NA STRONIE PO PŁATNOŚCI</button>');}
    box.innerHTML=btn.join('');
    q('#send-client-message').onclick=function(){var m=q('#client-message').value.trim();if(!m)return;addHistory(o,m);saveOrder(o);q('#client-message').value='';closeModal();openOrder(o.id);toast('Wiadomość zapisana.')};
@@ -150,16 +150,17 @@ function openOrder(id){
      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cmd).then(function(){toast('Rachunek skopiowany. Wklej komendę w Minecraft.');}).catch(function(){window.prompt('Skopiuj komendę i wklej ją w Minecraft:',cmd);});}
      else window.prompt('Skopiuj komendę i wklej ją w Minecraft:',cmd);
    };
-   if(q('#start-work'))q('#start-work').onclick=function(){if(!q('#edit-bay').value)return toast('Wybierz stanowisko 2–8.');saveFields();o.status='W TRAKCIE';addHistory(o,'Auto jest na stanowisku '+o.bay+'. Czekaj na informację z warsztatu.');saveOrder(o);closeModal();renderAll();toast('Praca rozpoczęta.')};
-   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();o.status='GOTOWE DO ODBIORU';addHistory(o,'Auto gotowe do odbioru. Wróć do recepcji Cent\'s Detailing&Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
+   if(q('#start-work'))q('#start-work').onclick=function(){var b=Number(q('#edit-bay').value);if(!(b>=2&&b<=5))return toast('Na start wybierz zwykłe stanowisko 2–5. Lakiernia (8) jest późniejszym etapem.');saveFields();o.status='W TRAKCIE';addHistory(o,'Auto jest na stanowisku '+o.bay+'. Czekaj na informację z warsztatu.');saveOrder(o);closeModal();renderAll();toast('Praca rozpoczęta.')};
+   if(q('#move-paint'))q('#move-paint').onclick=function(){if(!o.paint)return toast('Ten projekt nie ma wybranego koloru.');o.bay=8;saveOrder(o);addHistory(o,'Auto przeniesione do Lakierni — stanowisko 8. Lakierowanie według koloru z projektu.');saveOrder(o);closeModal();renderAll();toast('Staff OS: auto ustawione w Lakierni (8). Teraz wykonaj ten sam ruch w terminalu Minecraft.');};
+   if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();if(o.paint&&Number(o.bay)!==8)return toast('Ten projekt ma zmianę koloru. Najpierw przenieś auto do Lakierni (8).');if(!o.paint&&Number(o.bay)===8)return toast('Projekt bez koloru nie powinien być w Lakierni.');o.status='GOTOWE DO ODBIORU';addHistory(o,'Auto gotowe do odbioru. Wróć do recepcji Cent\'s Detailing&Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
    if(q('#finish-order'))q('#finish-order').onclick=function(){if(!confirm('Czy w Minecraft pojawił się komunikat PŁATNOŚĆ ZAKOŃCZONA i klient odebrał auto?'))return;saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność została zrealizowana w Minecraft, a auto wydane. Zlecenie Cent\'s Detailing&Customs jest zakończone.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zsynchronizowane z grą.')};
  },0)
 }
 
 function renderBays(){
- var active=C.listOrders().filter(function(o){return o.status!=='WYDANE'}),b=[{n:1,title:'PRZYJĘCIE AUTA',type:'intake'}];for(var i=2;i<=8;i++)b.push({n:i,title:'STANOWISKO UNIWERSALNE'});b.push({n:'P',title:'LAKIERNIA',type:'paint'});
- b.forEach(function(x){x.order=active.find(function(o){return o.bay===(x.n==='P'?'PAINT':x.n)})});
- q('#bay-grid').innerHTML=b.map(function(x){var o=x.order;return '<div class="bay '+(x.type||'')+'"><div class="bay-num">'+(x.n==='P'?'STREFA SPECJALNA':'STANOWISKO '+x.n)+'</div><h4>'+x.title+'</h4><div class="bay-status">'+(o?C.esc(o.status):'WOLNE')+'</div>'+(o?'<div class="bay-car">'+C.esc(o.vehicle.name)+'<br><span class="muted">'+C.esc(C.formatReg(o.registration))+' • '+C.esc(o.id)+'</span></div>':'')+'</div>'}).join('')
+ var active=C.listOrders().filter(function(o){return o.status!=='WYDANE'}),b=[{n:1,title:'PRZYJĘCIE AUTA',type:'intake'}];for(var i=2;i<=5;i++)b.push({n:i,title:'STANOWISKO ROBOCZE'});b.push({n:8,title:'LAKIERNIA',type:'paint'});
+ b.forEach(function(x){x.order=active.find(function(o){return Number(o.bay)===Number(x.n)})});
+ q('#bay-grid').innerHTML=b.map(function(x){var o=x.order;return '<div class="bay '+(x.type||'')+'"><div class="bay-num">'+(x.n===8?'LAKIERNIA — STANOWISKO 8':'STANOWISKO '+x.n)+'</div><h4>'+x.title+'</h4><div class="bay-status">'+(o?C.esc(o.status):'WOLNE')+'</div>'+(o?'<div class="bay-car">'+C.esc(o.vehicle.name)+'<br><span class="muted">'+C.esc(C.formatReg(o.registration))+' • '+C.esc(o.id)+'</span></div>':'')+'</div>'}).join('')
 }
 
 function getPartsOrders(){try{return JSON.parse(localStorage.getItem(PARTS_KEY)||'[]')}catch(e){return[]}}
