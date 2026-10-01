@@ -125,7 +125,7 @@ function openOrder(id){
  var priced=P?P.calculate(o.parts||[],[]):{rows:[],total:Number(o.priceTotal)||0,mechanicCut:Number(o.mechanicCut)||0};
  if(o.priceTotal!=null&&Number(o.priceTotal)!==priced.total){priced.total=Number(o.priceTotal);priced.mechanicCut=Number(o.mechanicCut)||priced.mechanicCut}
  var payoutRows=(priced.rows||[]).map(function(r){return '<div class="detail-box"><span>'+C.esc(T.part(r.name||'Pozycja'))+' • '+P.money(r.price)+'</span><b>udział ~65%: '+P.money(r.mechanicPayout)+'</b></div>'}).join('');
- var bays=['','2','3','4','5','8'].map(function(b){var label=!b?'Jeszcze nie wybrano':(b==='8'?'Lakiernia — stanowisko 8':'Stanowisko '+b);return '<option value="'+b+'" '+(String(o.bay||'')===b?'selected':'')+'>'+label+'</option>'}).join('');
+ var bays=['','2','3','4','5','8'].map(function(b){var label=!b?'Jeszcze nie wybrano':(b==='8'?'Lakiernia — stanowisko 8':'Stanowisko '+b);return '<option value="'+b+'" '+(String(o.bay||'')===b?'selected':'')+' '+(b==='8'&&!o.paint?'disabled':'')+'>'+label+'</option>'}).join('');
  var guide=o.status==='PRZYJĘCIE'
   ?'<b>Teraz:</b> terminal w grze → WEZWIJ NA STANOWISKO 1 → oględziny → przydziel zwykłe stanowisko 2–5.'
   :o.status==='W TRAKCIE'
@@ -151,7 +151,7 @@ function openOrder(id){
      else window.prompt('Skopiuj komendę i wklej ją w Minecraft:',cmd);
    };
    if(q('#start-work'))q('#start-work').onclick=function(){var b=Number(q('#edit-bay').value);if(!(b>=2&&b<=5))return toast('Na start wybierz zwykłe stanowisko 2–5. Lakiernia (8) jest późniejszym etapem.');saveFields();o.status='W TRAKCIE';addHistory(o,'Auto jest na stanowisku '+o.bay+'. Czekaj na informację z warsztatu.');saveOrder(o);closeModal();renderAll();toast('Praca rozpoczęta.')};
-   if(q('#move-paint'))q('#move-paint').onclick=function(){if(!o.paint)return toast('Ten projekt nie ma wybranego koloru.');o.bay=8;saveOrder(o);addHistory(o,'Auto przeniesione do Lakierni — stanowisko 8. Lakierowanie według koloru z projektu.');saveOrder(o);closeModal();renderAll();toast('Staff OS: auto ustawione w Lakierni (8). Teraz wykonaj ten sam ruch w terminalu Minecraft.');};
+   if(q('#move-paint'))q('#move-paint').onclick=function(){if(!o.paint)return toast('Ten projekt nie ma wybranego koloru.');var busy=C.listOrders().some(function(x){return x.id!==o.id&&x.status!=='WYDANE'&&Number(x.bay)===8});if(busy)return toast('Lakiernia (8) jest zajęta.');o.bay=8;saveOrder(o);addHistory(o,'Auto przeniesione do Lakierni — stanowisko 8. Lakierowanie według koloru z projektu.');saveOrder(o);closeModal();renderAll();toast('Staff OS: auto ustawione w Lakierni (8). Teraz wykonaj ten sam ruch w terminalu Minecraft.');};
    if(q('#mark-ready'))q('#mark-ready').onclick=function(){saveFields();if(o.paint&&Number(o.bay)!==8)return toast('Ten projekt ma zmianę koloru. Najpierw przenieś auto do Lakierni (8).');if(!o.paint&&Number(o.bay)===8)return toast('Projekt bez koloru nie powinien być w Lakierni.');o.status='GOTOWE DO ODBIORU';addHistory(o,'Auto gotowe do odbioru. Wróć do recepcji Cent\'s Detailing&Customs.');saveOrder(o);closeModal();renderAll();toast('Auto gotowe.')};
    if(q('#finish-order'))q('#finish-order').onclick=function(){if(!confirm('Czy w Minecraft pojawił się komunikat PŁATNOŚĆ ZAKOŃCZONA i klient odebrał auto?'))return;saveFields();o.status='WYDANE';o.paymentStatus='OPŁACONE';addHistory(o,'Płatność została zrealizowana w Minecraft, a auto wydane. Zlecenie Cent\'s Detailing&Customs jest zakończone.');saveOrder(o);closeModal();renderAll();toast('Zlecenie zsynchronizowane z grą.')};
  },0)
