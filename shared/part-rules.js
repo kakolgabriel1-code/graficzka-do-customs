@@ -168,7 +168,7 @@ function appearance(category,name){
   var c=String(category||''),n=String(name||''),l=low(n),s=slot(c,n);
   if(c==='Bodykit') return 'Kolor: dopasowany do lakieru / tekstury nadwozia auta.';
   if(c==='Wheels / Rims'){
-    if(rimColors[n]) return 'Warianty kolorów: '+rimColors[n]+'.';
+    if(exactVariantOptions[n]) return 'Warianty kolorów: '+exactVariantOptions[n].join(', ')+'.';
     if(/stock|rims|wheels/i.test(n)) return 'Kolor: fabryczna kolorystyka felgi danego modelu.';
     return 'Kolor: bazowy wariant felgi z paczki GT Craft.';
   }
