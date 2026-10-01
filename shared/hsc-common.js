@@ -44,6 +44,21 @@ function compactPartIndex(part){
   for(var i=0;i<a.length;i++)if(a[i].category===part.category&&a[i].name===part.name)return i;
   return -1
 }
+function stablePartId(part){
+  var s=String(part&&part.category||'')+'\u001f'+String(part&&part.name||''),h=2166136261>>>0;
+  for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
+  return h.toString(36)
+}
+function stablePartMatch(id){
+  var a=(window.HSC_DATA&&window.HSC_DATA.parts)||[],found=null,count=0;
+  for(var i=0;i<a.length;i++)if(stablePartId(a[i])===String(id||'')){found=a[i];count++}
+  return count===1?found:null
+}
+function stablePartUnique(part){
+  var id=stablePartId(part),a=(window.HSC_DATA&&window.HSC_DATA.parts)||[],count=0;
+  for(var i=0;i<a.length;i++)if(stablePartId(a[i])===id)count++;
+  return count===1?id:''
+}
 function serviceId(v){
   var x=String(v||'').toLowerCase();
   if(x.indexOf('diagnost')>=0)return'd';
@@ -57,10 +72,10 @@ function serviceId(v){
 function serviceName(v){
   return {d:'Diagnostyka pełna',k:'Serwis kół / felg',z:'Serwis zawieszenia',h:'Serwis hamulców',l:'Lakiernia',e:'Detailing / przygotowanie'}[v]||v
 }
-function compactProject(p,noteLimit){
+function compactProjectV4(p,noteLimit){
   var parts=(p.parts||[]).map(function(x){
-    var i=compactPartIndex(x);
-    return i>=0?[i,x.color||'']:[-1,x.category||'',x.name||'',x.color||'']
+    var sid=stablePartUnique(x);
+    return sid?[sid,x.color||'']:['',x.category||'',x.name||'',x.color||'']
   });
   return {
     i:p.id||projectId(),
@@ -74,16 +89,8 @@ function compactProject(p,noteLimit){
     n:String(p.note||'').slice(0,noteLimit==null?240:noteLimit)
   }
 }
-function restoreCompact(x){
+function restoreProjectBase(x,parts){
   var data=window.HSC_DATA||{vehicles:[],parts:[]},vd=(data.vehicles||[]).find(function(v){return v.id===x.v})||{id:x.v,name:x.v,pack:'',itemId:''};
-  var parts=(x.p||[]).map(function(row){
-    if(row[0]>=0){
-      var d=(data.parts||[])[row[0]];
-      if(!d)return null;
-      return {category:d.category,name:d.name,color:row[1]||null}
-    }
-    return {category:row[1]||'',name:row[2]||'',color:row[3]||null}
-  }).filter(Boolean);
   var services=(x.s||[]).map(serviceName);
   var priced=window.HSCPricing?window.HSCPricing.calculate(parts,services):{total:0,mechanicCut:0,workshopCut:0};
   var reg=makeChicagoReg(x.r||'');
@@ -105,15 +112,39 @@ function restoreCompact(x){
     history:[{at:new Date().toISOString(),text:'Projekt klienta zaimportowany do Cent\'s Detailing&Customs.'}]
   }
 }
+function restoreCompactV4(x){
+  var parts=(x.p||[]).map(function(row){
+    if(row[0]){
+      var d=stablePartMatch(row[0]);
+      if(!d)throw new Error('PART_DATA_MISMATCH:'+row[0]);
+      return {category:d.category,name:d.name,color:row[1]||null}
+    }
+    return {category:row[1]||'',name:row[2]||'',color:row[3]||null}
+  });
+  return restoreProjectBase(x,parts)
+}
+function restoreCompactV3(x){
+  var data=window.HSC_DATA||{vehicles:[],parts:[]};
+  var parts=(x.p||[]).map(function(row){
+    if(row[0]>=0){
+      var d=(data.parts||[])[row[0]];
+      if(!d)return null;
+      return {category:d.category,name:d.name,color:row[1]||null}
+    }
+    return {category:row[1]||'',name:row[2]||'',color:row[3]||null}
+  }).filter(Boolean);
+  return restoreProjectBase(x,parts)
+}
 function projectCode(p){
-  var code=encode(compactProject(p,240),'HSCP3');
-  if(code.length>1850)code=encode(compactProject(p,80),'HSCP3');
-  if(code.length>1850)code=encode(compactProject(p,0),'HSCP3');
+  var code=encode(compactProjectV4(p,240),'HSCP4');
+  if(code.length>1850)code=encode(compactProjectV4(p,80),'HSCP4');
+  if(code.length>1850)code=encode(compactProjectV4(p,0),'HSCP4');
   return code
 }
 function parseProjectCode(c){
   c=String(c||'').trim();
-  if(c.indexOf('HSCP3:')===0)return restoreCompact(decode(c,'HSCP3'));
+  if(c.indexOf('HSCP4:')===0)return restoreCompactV4(decode(c,'HSCP4'));
+  if(c.indexOf('HSCP3:')===0)return restoreCompactV3(decode(c,'HSCP3'));
   if(c.indexOf('HSCP2:')===0)return decode(c,'HSCP2');
   if(c.indexOf('HSCP1:')===0)return decode(c,'HSCP1');
   throw new Error('BAD_PREFIX')
