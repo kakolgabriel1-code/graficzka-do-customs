@@ -20,7 +20,7 @@ function serviceGuideHtml(o){
  function has(re){return services.some(function(x){return re.test(x)})}
  function row(title,tool,text){rows.push('<div class="detail-box"><span>'+C.esc(title)+(tool?' • narzędzie: '+C.esc(tool):'')+'</span><b>'+C.esc(text)+'</b></div>')}
  if(has(/Diagnostyka/i))row('Diagnostyka pełna','Part Scanner','Podejdź do auta, użyj Part Scanner i sprawdź zamontowane części oraz sloty. Porównaj wynik ze zleceniem.');
- if(has(/Lakiernia/i)||o.paint)row('Lakiernia','Paint Gun','Docelowy wariant: '+(o.paint||'zgodny ze zleceniem')+'. Zmień prawdziwy wariant pojazdu — nie tylko opis na stronie.');
+ if(has(/Lakiernia/i)||o.paint)row('Lakiernia — stanowisko 8','Paint Gun','Najpierw zakończ zwykłe prace na stanowisku 2-5. Potem w terminalu wybierz LAKIERNIA / LAKIEROWANIE i przenieś auto na 8. Docelowy wariant: '+(o.paint||'zgodny ze zleceniem')+'. Po lakierowaniu: AUTO GOTOWE → LAKIERNIA (8).');
  if(has(/kół|felg/i))row('Serwis kół / felg','—','Sprawdź obecny zestaw. Jeśli zlecenie ma nowe felgi lub opony, odbierz komplet z dostawy i zamontuj dokładnie zamówiony wariant. Tire Machine traktuj tylko jako RP, jeśli mod nie wymaga jej technicznie.');
  if(has(/hamulc/i))row('Serwis hamulców','—','Sprawdź obecne hamulce. Nowy fizyczny zestaw montuj tylko wtedy, gdy jest w częściach zlecenia.');
  if(has(/zawieszen/i))row('Serwis zawieszenia','—','Sprawdź dostępne elementy zawieszenia i wymieniaj tylko części zapisane w zleceniu.');
