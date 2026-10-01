@@ -177,12 +177,14 @@ function partOrderStatus(orderId,index,part){
 
 const CENTS_VALID_PART_IDS=new Set([11316043,12793415,20351911,23924084,38870799,44739527,49756079,54384158,55918972,88847639,104370957,109384145,116932450,128494942,137254784,138107598,160227850,164309139,166091375,171452022,183958164,190069777,193910064,194158506,203813862,212303047,219833782,221107415,226185421,249211112,253484210,257878212,258777824,267842027,271213845,274350172,275031290,276027433,283695483,284619646,297613685,304419070,314609651,316827608,328012926,331984582,346512173,371391705,378912194,380862055,382197772,384271848,386848320,392704627,397511040,401049467,402475541,404298779,404685324,414611775,423187356,423708243,434604705,437093149,438902612,441458785,441937346,445413045,449213361,450695811,456532035,458373868,460427176,465945662,470619043,484937562,490851791,495835410,496236543,508174532,510934160,513636736,513828007,528835150,533560753,553025149,553786508,557538451,561810862,561936916,563969593,569302698,589032321,591888643,597080450,598341003,609580740,613768143,614621440,615188619,615748362,624097191,630209539,633910569,643000098,655455836,660849053,661532052,664788051,666460757,670747060,674348109,679918904,684488038,687454278,689936870,695747446,705345097,711071371,714918838,725205977,725402794,726076956,738192256,740231337,742246033,742382733,743529046,755337131,756550131,762100875,785849719,785976564,789553395,797683942,799567057,808150159,808396732,816715696,821409042,827666071,830157772,838962909,848947585,849474885,855919822,867036841,869292734,872086095,878796207,879889721,881152085,888629499,894784477,904511782,905267110,912468739,918683070,920864490,921441717,927844438,948692917,961016170,967103578,970343758,979139575,981840379,984112809,984917818,996758231,1011179734,1024911957,1028830707,1038263265,1042573019,1058003581,1067881420,1069545120,1082336464,1087623691,1091414918,1096215543,1101389970,1111633660,1115682692,1119877977,1133539841,1150317460,1154273814,1163165125,1169310149,1188286482,1195793473,1199302415,1200220117,1207238574,1212738250,1218163464,1222631615,1226291222,1248574666,1248901058,1250494259,1251230322,1252836207,1265702800,1298966086,1318173283,1318649562,1321018434,1324355373,1327300131,1337237891,1341990696,1378598776,1411699972,1412647242,1417223894,1428536823,1433333259,1435581340,1437269734,1438184903,1438798260,1444243556,1444494082,1445314442,1446607121,1463499788,1472913373,1474617080,1482842907,1486473261,1494972566,1506250875,1511079781,1536834868,1551488971,1557994791,1558940330,1561243202,1565057423,1573728565,1578157703,1580681565,1581835042,1584923836,1585399588,1593149488,1602316944,1605506768,1618431394,1624154397,1625052737,1628509745,1650595452,1655058679,1658371914,1659581707,1669360227,1673258565,1677341548,1677415612,1684069219,1684174778,1684186747,1694749275,1695580752,1701956848,1704252623,1709767445,1727554050,1737223053,1740884774,1742380277,1744211228,1749199693,1749413392,1757856676,1761518005,1763663472,1771791677,1772799974,1773391471,1776024277,1784829067,1784915855,1789997063,1792146992,1793123517,1799634720,1809562827,1810534809,1811619432,1817734943,1836587282,1839740620,1840328631,1843113624,1844953199,1848685228,1851572155,1856080441,1856566183,1857893892,1867836733,1869679371,1874035432,1877637141,1880287661,1887328356,1894220559,1908107274,1918554286,1919301303,1931627823,1939802399,1950384704,1960226683,1970042919,1982698321,1989548248,1993672276,1998936298,2013020883,2015474402,2021134363,2029119780,2040627717,2041655565,2041963978,2054390311,2063320144,2066166724,2075275023,2081019274,2082179463,2098957671,2099344873,2105003120,2122315688,2123652571,2124024898,2126821575,2137218258,2139139321,2140234602,2140988490]);
 function centsNormalizePartName(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'')}
-function centsDeliveryId(name){
- var str=centsNormalizePartName(name),h=2166136261>>>0;
+function centsDeliveryId(name,color){
+ var str=centsNormalizePartName(name);
+ if(color)str+='variant'+centsNormalizePartName(color);
+ var h=2166136261>>>0;
  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
  return h&0x7fffffff
 }
-function centsCanDeliver(name){return centsDeliveryId(name)>0}
+function centsCanDeliver(name,color){return centsDeliveryId(name,color)>0}
 function deliveryCategoryFor(part){
  var c=String((part&&part.category)||'');
  if(c==='Engine upgrades'||c==='Performance'||c==='Nitrous')return 1;
@@ -246,7 +248,7 @@ function renderPartsOrders(){
  q('#parts-list').innerHTML=active.length?active.map(function(x){
    var i=all.indexOf(x);
    var state=x.state==='W DRODZE'?'W DRODZE':'DO URUCHOMIENIA';
-   return '<div class="order-row" style="grid-template-columns:1.15fr 1.7fr .8fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>komplet wg mappingu'+(x.color?' • '+C.esc(x.color):'')+'</small></div><div><span class="status-pill">'+C.esc(state)+'</span></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">OBSŁUŻ DOSTAWĘ</button></div></div>'
+   return '<div class="order-row" style="grid-template-columns:1.15fr 1.7fr .8fr auto"><div><b>'+C.esc(x.orderId)+'</b><small>'+C.esc(x.categoryName)+'</small></div><div><b>'+C.esc(x.name)+'</b><small>'+(x.qty||1)+' szt.'+(x.color?' • '+C.esc(x.color):'')+'</small></div><div><span class="status-pill">'+C.esc(state)+'</span></div><div><button class="btn ghost" data-part-action="'+i+'" style="padding:8px 10px">OBSŁUŻ DOSTAWĘ</button></div></div>'
  }).join(''):'<div class="mini-empty">Brak aktywnych dostaw.</div>';
  qa('[data-part-action]').forEach(function(b){b.onclick=function(){openPartsAction(Number(b.getAttribute('data-part-action')))}})
 }
@@ -291,15 +293,16 @@ q('#parts-create').onclick=function(){
  var o=C.listOrders().find(function(x){return x.id===oid});if(!o)return toast('Nie znaleziono zlecenia.');
  var part=(o.parts||[])[Number(picked.i)];if(!part)return toast('Ta część nie jest już w zleceniu.');
  var cat=deliveryCategoryFor(part),cc=partCats.find(function(x){return x.id===cat});
- var rawName=part.name||part,name=T.part(rawName),color=part.color||'',deliveryId=centsDeliveryId(rawName);
- if(!centsCanDeliver(rawName))return toast('Ta część nie ma jeszcze potwierdzonego fizycznego itemu w GT Craft. Nie uruchamiam błędnej dostawy.');
+ var rawName=part.name||part,name=T.part(rawName),color=part.color||'',deliveryId=centsDeliveryId(rawName,color);
+ if(!centsCanDeliver(rawName,color))return toast('Ta część / wariant nie ma potwierdzonego fizycznego itemu w GT Craft. Nie uruchamiam błędnej dostawy.');
+ var qty=R&&R.deliveryQuantity?R.deliveryQuantity(part.category||'',rawName):1;
  var a=getPartsOrders(),partIndex=Number(picked.i);
  var existing=a.find(function(x){return samePartOrder(x,oid,partIndex,part)});
  if(existing){
   if(existing.state==='ODEBRANE')return toast('Ta część została już odebrana. Nie można zamówić jej drugi raz.');
   return toast('Ta część ma już aktywną dostawę.')
  }
- a.unshift({id:'PART-'+Date.now(),orderId:oid,partIndex:partIndex,category:cat,categoryName:cc?cc.name:'Pozostałe części',name:name,rawName:rawName,deliveryId:deliveryId,color:color,qty:null,qtyMode:'MAPPING',state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});
+ a.unshift({id:'PART-'+Date.now(),orderId:oid,partIndex:partIndex,category:cat,categoryName:cc?cc.name:'Pozostałe części',name:name,rawName:rawName,deliveryId:deliveryId,color:color,qty:qty,qtyMode:'EXACT',state:'DO URUCHOMIENIA',createdAt:new Date().toISOString()});
  savePartsOrders(a);q('#parts-name').value='';updatePartCategoryHint();renderPartsOrders();toast('Dodano do dostawy. Teraz kliknij OBSŁUŻ DOSTAWĘ.')
 };
 
